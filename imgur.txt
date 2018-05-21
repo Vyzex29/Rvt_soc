@@ -1,0 +1,4 @@
+https://imgur.com/#access_token=a2bbf2d8f13216581f3cd5db3d0e55f436a70919&expires_in=315360000&token_type=bearer&refresh_token=5873717eac7255dff17e639bd340249a26d54b41&account_username=Vyzex29&account_id=76091645
+
+//access token: a2bbf2d8f13216581f3cd5db3d0e55f436a70919
+//refresh token: 5873717eac7255dff17e639bd340249a26d54b41
