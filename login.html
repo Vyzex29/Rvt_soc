@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,29 +31,6 @@
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/bs-animation.js"></script>
-    <script type="text/javascript">
-        $('#login').click(function() {
-                $.ajax({
-                        type: "POST",
-                        url: "api/auth",
-                        processData: false,
-                        contentType: "application/json",
-                        data: '{ "username": "'+ $("#username").val() +'", "password": "'+ $("#password").val() +'" }',
-                        success: function(r) {
-                                console.log(r);
-                                document.location.replace('index.php');
-                             
-                        },
-                        error: function(r) {
-                                setTimeout(function() {
-                                $('[data-bs-hover-animate]').removeClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'));
-                                }, 2000)
-                                $('[data-bs-hover-animate]').addClass('animated ' + $('[data-bs-hover-animate]').attr('data-bs-hover-animate'))
-                                console.log(r);
-                        }
-                });
-        });
-    </script>
+    <script src="assets/js/login.js"></script>
 </body>
-
 </html>

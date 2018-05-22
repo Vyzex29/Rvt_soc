@@ -23,7 +23,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
     <link rel="stylesheet" href="assets/css/Login-Form-Clean.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean1.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/untitled.css">
+    <link rel="stylesheet" href="assets/css/index.css">
 </head>
 
 <body>
@@ -122,7 +122,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
             </div>
         </div>
     </div>
-    <div class="footer-dark">
+    <div class="footer-dark navbar-fixed-bottom">
         <footer>
             <div class="container">
                 <p class="copyright">Valerijs Diks 2017/2018</p>
@@ -133,12 +133,11 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/bs-animation.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
-    <script type="text/javascript">
+     <script type="text/javascript">
     SENDER = window.location.hash.split('#')[1];
     USERNAME = "";
     function getUsername() {
             $.ajax({
-
                     type: "GET",
                     url: "api/users",
                     processData: false,
@@ -149,16 +148,12 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                     }
             })
     }
-
     $(document).ready(function() {
-
             $(window).on('hashchange', function() {
                     location.reload()
             })
-
             $('#sendmessage').click(function() {
                     $.ajax({
-
                             type: "POST",
                             url: "api/message",
                             processData: false,
@@ -168,13 +163,10 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                     location.reload()
                             },
                             error: function(r) {
-
                             }
                     })
             })
-
             $.ajax({
-
                     type: "GET",
                     url: "api/musers",
                     processData: false,
@@ -190,9 +182,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                             }
                     }
             })
-
             $.ajax({
-
                     type: "GET",
                     url: "api/messages?sender="+SENDER,
                     processData: false,
@@ -201,7 +191,6 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                     success: function(r) {
                             r = JSON.parse(r)
                             $.ajax({
-
                                     type: "GET",
                                     url: "api/users",
                                     processData: false,
