@@ -2,10 +2,42 @@
 require_once("DB.php");
 require_once("Mail.php");
 
-$db = new DB("127.0.0.1", "rvt_social", "root", "");
+$db = new DB("localhost", "SocialNetwork", "root", "root");
 
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
-        if ($_GET['url'] == "auth") {
+
+        if ($_GET['url'] == "musers") {
+
+                $token = $_COOKIE['SNID'];
+                $userid = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
+
+                $users = $db->query("SELECT DISTINCT s.username AS Sender, r.username AS Receiver, s.id AS SenderID, r.id AS ReceiverID FROM messages LEFT JOIN users s ON s.id = messages.sender LEFT JOIN users r ON r.id = messages.receiver WHERE (s.id = :userid OR r.id=:userid)", array(":userid"=>$userid));
+                $u = array();
+                foreach ($users as $user) {
+                        if (!in_array(array('username'=>$user['Receiver'], 'id'=>$user['ReceiverID']), $u)) {
+                                array_push($u, array('username'=>$user['Receiver'], 'id'=>$user['ReceiverID']));
+                        }
+                        if (!in_array(array('username'=>$user['Sender'], 'id'=>$user['SenderID']), $u)) {
+                                array_push($u, array('username'=>$user['Sender'], 'id'=>$user['SenderID']));
+                        }
+                }
+                echo json_encode($u);
+
+        } else if ($_GET['url'] == "auth") {
+
+        } else if ($_GET['url'] == "messages") {
+                $sender = $_GET['sender'];
+                $token = $_COOKIE['SNID'];
+                $receiver = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
+
+                $messages = $db->query('SELECT messages.id, messages.body, s.username AS Sender, r.username AS Receiver
+FROM messages
+LEFT JOIN users s ON messages.sender = s.id
+LEFT JOIN users r ON messages.receiver = r.id
+WHERE (r.id=:r AND s.id=:s) OR r.id=:s AND s.id=:r', array(':r'=>$receiver, ':s'=>$sender));
+
+echo json_encode($messages);
+
         } else if ($_GET['url'] == "search") {
 
                 $tosearch = explode(" ", $_GET['query']);
@@ -24,7 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 $posts = $db->query('SELECT posts.id, posts.body, users.username, posts.posted_at FROM posts, users WHERE users.id = posts.user_id AND posts.body LIKE :body '.$whereclause.' LIMIT 10', $paramsarray);
                 //echo "<pre>";
                 echo json_encode($posts);
+
         } else if ($_GET['url'] == "users") {
+
+                $token = $_COOKIE['SNID'];
+                $user_id = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
+                $username = $db->query('SELECT username FROM users WHERE id=:uid', array(':uid'=>$user_id))[0]['username'];
+                echo $username;
+
         } else if ($_GET['url'] == "comments" && isset($_GET['postid'])) {
                 $output = "";
                 $comments = $db->query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$_GET['postid']));
@@ -45,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 $token = $_COOKIE['SNID'];
 
                 $userid = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
-
                 $followingposts = $db->query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username` FROM users, posts, followers
                 WHERE (posts.user_id = followers.user_id
                 OR posts.user_id = :userid)
@@ -75,7 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         } else if ($_GET['url'] == "profileposts") {
                 $start = (int)$_GET['start'];
                 $userid = $db->query('SELECT id FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['id'];
-
                 $followingposts = $db->query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username` FROM users, posts
                 WHERE users.id = posts.user_id
                 AND users.id = :userid
@@ -105,14 +142,47 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         }
 
 } else if ($_SERVER['REQUEST_METHOD'] == "POST") {
-        if ($_GET['url'] == "users") {
+
+        if (isset($_COOKIE['SNID'])) {
+          $token = $_COOKIE['SNID'];
+        } else {
+          die();
+        }
+
+        $userid = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
+
+        $postBody = file_get_contents("php://input");
+        $postBody = json_decode($postBody);
+
+        $body = $postBody->body;
+        $receiver = $postBody->receiver;
+
+        if (strlen($body) > 100) {
+                echo "{ 'Error': 'Message too long!' }";
+        }
+        if ($body == null) {
+          $body = "";
+        }
+        if ($receiver == null) {
+          die();
+        }
+        if ($userid == null) {
+          die();
+        }
+        $db->query("INSERT INTO messages VALUES ('', :body, :sender, :receiver, '0')", array(':body'=>$body, ':sender'=>$userid, ':receiver'=>$receiver));
+
+        echo '{ "Success": "Message Sent!" }';
+
+        if ($_GET['url'] == "message") {
+
+        } else if ($_GET['url'] == "users") {
+
                 $postBody = file_get_contents("php://input");
                 $postBody = json_decode($postBody);
 
                 $username = $postBody->username;
                 $email = $postBody->email;
                 $password = $postBody->password;
-                $confirmpassword=$postBody->confirmpassword;
 
 
                 if (!$db->query('SELECT username FROM users WHERE username=:username', array(':username'=>$username))) {
@@ -124,20 +194,15 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                         if (strlen($password) >= 6 && strlen($password) <= 60) {
 
                                         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                            if ($password==$confirmpassword){
-                                                   if (!$db->query('SELECT email FROM users WHERE email=:email', array(':email'=>$email))) {
-                                                    $db->query('INSERT INTO users VALUES (null, :username, :password, :email, "0", null)', array(':username'=>$username, ':password'=>password_hash($password, PASSWORD_BCRYPT), ':email'=>$email));
-                                                    Mail::sendMail('Welcome to our Social Network!', 'Your account has been created!', $email);
-                                                    echo '{ "Success": "User Created!" }';
-                                                    http_response_code(200);
-                                                   } else {
-                                                       echo '{ "Error": "Email in use!" }';
-                                                       http_response_code(409);
-                                                   }
-                                            }else{
-                                                echo '{ "Error": "Passwords do not match!" }';
-                                                
-                                                echo $confirmpassword;
+
+                                        if (!$db->query('SELECT email FROM users WHERE email=:email', array(':email'=>$email))) {
+
+                                                $db->query('INSERT INTO users VALUES (\'\', :username, :password, :email, \'0\', \'\')', array(':username'=>$username, ':password'=>password_hash($password, PASSWORD_BCRYPT), ':email'=>$email));
+                                                Mail::sendMail('Welcome to our Social Network!', 'Your account has been created!', $email);
+                                                echo '{ "Success": "User Created!" }';
+                                                http_response_code(200);
+                                        } else {
+                                                echo '{ "Error": "Email in use!" }';
                                                 http_response_code(409);
                                         }
                                 } else {
@@ -184,9 +249,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                 $cstrong = True;
                                 $token = bin2hex(openssl_random_pseudo_bytes(64, $cstrong));
                                 $user_id = $db->query('SELECT id FROM users WHERE username=:username', array(':username'=>$username))[0]['id'];
-                                $db->query('INSERT INTO login_tokens VALUES (null, :token, :user_id)', array(':token'=>sha1($token), ':user_id'=>$user_id));
-                                setcookie("SNID", $token, time() + 60 * 60 * 24 * 7, '/', NULL, NULL, TRUE);//7day validation cookie
-                                setcookie("SNID_", '1',time() + 60 * 60 * 24 * 3, '/', NULL, NULL, TRUE);//cookie reset
+                                $db->query('INSERT INTO login_tokens VALUES (\'\', :token, :user_id)', array(':token'=>sha1($token), ':user_id'=>$user_id));
+                                echo '{ "Token": "'.$token.'" }';
                         } else {
                                 echo '{ "Error": "Invalid username or password!" }';
                                 http_response_code(401);
@@ -201,14 +265,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 $token = $_COOKIE['SNID'];
                 $likerId = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
 
-                if (!$db->query('SELECT user_id FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId))) {
+                if (!$db->query('SELECT user_id FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId))) {
+
                         $db->query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$postId));
-                        $db->query('INSERT INTO posts_likes VALUES (null, :postid, :userid)', array(':postid'=>$postId, ':userid'=>$likerId));
+                        $db->query('INSERT INTO post_likes VALUES (\'\', :postid, :userid)', array(':postid'=>$postId, ':userid'=>$likerId));
                         //Notify::createNotify("", $postId);
                 } else {
                         $db->query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$postId));
-                        $db->query('DELETE FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId));
-                        $db->query('DELETE FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId));
+                        $db->query('DELETE FROM post_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId));
                 }
 
                 echo "{";
@@ -236,4 +300,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 } else {
         http_response_code(405);
 }
+
+// Helper functions
 ?>

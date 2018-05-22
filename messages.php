@@ -122,7 +122,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
             </div>
         </div>
     </div>
-    <div class="footer-dark">
+    <div class="footer-dark navbar-fixed-bottom">
         <footer>
             <div class="container">
                 <p class="copyright">Valerijs Diks 2017/2018</p>
