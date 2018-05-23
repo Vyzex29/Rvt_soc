@@ -119,10 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 OFFSET '.$start.';', array(':userid'=>$userid));
                 $response = "[";
                 foreach($followingposts as $post) {
-
+                        
                         $response .= "{";
                                 $response .= '"PostId": '.$post['id'].',';
-                                $response .= '"PostBody": "'.$post['body'].'",';
+                                $response .= '"PostBody": "'.$str.'",';
                                 $response .= '"PostedBy": "'.$post['username'].'",';
                                 $response .= '"PostDate": "'.$post['posted_at'].'",';
                                 $response .= '"PostImage": "'.$post['postimg'].'",';
@@ -235,12 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 
         }
 
-        if ($_GET['url'] == "post") {
-                $token = $_COOKIE['SNID'];
-
-                $userid = $db->query('SELECT user_id FROM login_tokens WHERE token=:token', array(':token'=>sha1($token)))[0]['user_id'];
-                echo "Dfdf";
-        }
 
         if ($_GET['url'] == "auth") {
                 $postBody = file_get_contents("php://input");
@@ -274,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 if (!$db->query('SELECT user_id FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId))) {
                         $db->query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$postId));
                         $db->query('INSERT INTO posts_likes VALUES (null, :postid, :userid)', array(':postid'=>$postId, ':userid'=>$likerId));
-                        //Notify::createNotify("", $postId);
+                        
                 } else {
                         $db->query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$postId));
                         $db->query('DELETE FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId));
