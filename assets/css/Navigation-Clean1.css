@@ -2,7 +2,7 @@
   background:#fff;
   padding-top:10px;
   padding-bottom:10px;
-  color:#ff4c4c;
+  color:#316808;
   border-radius:0;
   box-shadow:none;
   border-bottom:1px solid #ebebeb;
@@ -29,7 +29,7 @@
 }
 
 .navigation-clean .navbar-brand:hover {
-  color:#ff4c4c;
+  color:#59ba10;
 }
 
 .navigation-clean.navbar-inverse .navbar-brand:hover {
@@ -95,7 +95,7 @@
 }
 
 .navigation-clean.navbar-default .navbar-nav > li > a:focus, .navigation-clean.navbar-default .navbar-nav > li > a:hover {
-  color:#ff4c4c!important;
+  color:#3b7c0b!important;
   background-color:transparent;
 }
 

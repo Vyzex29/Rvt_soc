@@ -43,7 +43,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                         <li class="divider" role="presentation"></li>
                         <li role="presentation"><a href="index.php">Timeline </a></li>
                         <li role="presentation"><a href="messages.php">Messages </a></li>
-                        <li role="presentation"><a href="notify.php">Notifications </a></li>
+                        <li class="active" role="presentation"><a href="notify.php">Notifications </a></li>
                         <li role="presentation"><a href="change_password.php">Password change</a></li>
                         <li role="presentation"><a href="logout.php">Logout </a></li>
                     </ul>
@@ -74,7 +74,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 <li class="divider" role="presentation"></li>
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li role="presentation"><a href="messages.php">Messages </a></li>
-                                <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li class="active" role="presentation"><a href="notify.php">Notifications </a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
                                 <li role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
@@ -90,7 +90,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 <li class="divider" role="presentation"></li>
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li role="presentation"><a href="messages.php">Messages </a></li>
-                                <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li class="active" role="presentation"><a href="notify.php">Notifications </a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
                                 <li role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
