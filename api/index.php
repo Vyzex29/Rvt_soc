@@ -52,8 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         $paramsarray[":p$i"] = $tosearch[$i];
                         }
                 }
-                $posts = $db->query('SELECT posts.id, posts.body, users.username, posts.posted_at FROM posts, users WHERE users.id = posts.user_id AND posts.body LIKE :body '.$whereclause.' LIMIT 10', $paramsarray);
-                //echo "<pre>";
+                $posts = $db->query('SELECT posts.id, posts.body, users.username, posts.posted_at FROM posts, users WHERE users.id = posts.user_id AND posts.body LIKE :body '.$whereclause.' LIMIT 10', $paramsarray);                
                 echo json_encode($posts);
         } else if ($_GET['url'] == "users") {
                 $token = $_COOKIE['SNID'];
@@ -65,8 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 $comments = $db->query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$_GET['postid']));
                 $output .= "[";
                 foreach($comments as $comment) {
+                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', $comment['comment']);
                         $output .= "{";
-                        $output .= '"Comment": "'.$comment['comment'].'",';
+                        $output .= '"Comment": "'.$str.'",';
                         $output .= '"CommentedBy": "'.$comment['username'].'"';
                         $output .= "},";
                         //echo $comment['comment']." ~ ".$comment['username']."<hr />";
@@ -89,11 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 ORDER BY posts.likes DESC;', array(':userid'=>$userid), array(':userid'=>$userid));
                 $response = "[";
                 foreach($followingposts as $post) {
-
+                        $str = str_replace(array("\r\n", "\n", "\r"), ' ', $post['body']);
                         $response .= "{";
                                 $response .= '"PostId": '.$post['id'].',';
                                 $response .= '"PostBody": "'.$post['body'].'",';
-                                $response .= '"PostedBy": "'.$post['username'].'",';
+                                $response .= '"PostedBy": "'.$str.'",';
                                 $response .= '"PostDate": "'.$post['posted_at'].'",';
                                 $response .= '"PostImage": "'.$post['postimg'].'",';
                                 $response .= '"Likes": '.$post['likes'].'';
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 OFFSET '.$start.';', array(':userid'=>$userid));
                 $response = "[";
                 foreach($followingposts as $post) {
-                        
+                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', $post['body']);
                         $response .= "{";
                                 $response .= '"PostId": '.$post['id'].',';
                                 $response .= '"PostBody": "'.$str.'",';

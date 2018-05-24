@@ -56,8 +56,7 @@ if (isset($_GET['username'])) {
                 }
                 if (isset($_POST['post'])) {
                     $str = str_replace(array("\r\n", "\n", "\r"), ' ', $_POST['postbody']);
-                        if ($_FILES['postimg']['size'] == 0) {
-                            
+                        if ($_FILES['postimg']['size'] == 0) {                            
                                 Post::createPost($str, Login::isLoggedIn(), $userid);
                         } else {
                                 $postid = Post::createImgPost($str, Login::isLoggedIn(), $userid);

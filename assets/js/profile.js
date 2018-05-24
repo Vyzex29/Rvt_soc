@@ -209,11 +209,6 @@
             output += " ~ ";
             output += res[i].CommentedBy;
             output += "<hr />";
-        }
-        output += '<form method="POST" action="profile.php?username=' + username + '"  enctype="text/plain">' +
-            '<textarea name="commentbody" rows="4" cols="75">' +
-            '</textarea>' +
-            '<input type="submit" comment-id="'+buttonId+'" name="submitComment" value="comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">' +
-            '</form>';
+        }     
         $('.modal-body').html(output)        
     }
