@@ -99,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         $str = str_replace(array("\r\n", "\n", "\r"), ' ', $post['body']);
                         $response .= "{";
                                 $response .= '"PostId": '.$post['id'].',';
-                                $response .= '"PostBody": "'.$post['body'].'",';
-                                $response .= '"PostedBy": "'.$str.'",';
+                                $response .= '"PostBody": "'.$str.'",';
+                                $response .= '"PostedBy": "'.$post['username'].'",';
                                 $response .= '"PostDate": "'.$post['posted_at'].'",';
                                 $response .= '"PostImage": "'.$post['postimg'].'",';
                                 $response .= '"Likes": '.$post['likes'].'';
