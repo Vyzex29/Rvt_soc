@@ -1,29 +1,5 @@
         $(document).ready(function() {
 
-                $('.sbox').keyup(function() {
-                        $('.autocomplete').html("")
-                        $.ajax({
-
-                                type: "GET",
-                                url: "api/search?query=" + $(this).val(),
-                                processData: false,
-                                contentType: "application/json",
-                                data: '',
-                                success: function(r) {
-                                        r = JSON.parse(r)
-                                        for (var i = 0; i < r.length; i++) {
-                                                console.log(r[i].body)
-                                                $('.autocomplete').html(
-                                                        $('.autocomplete').html() +
-                                                        '<a href="profile.php?username='+r[i].username+'#'+r[i].id+'"><li class="list-group-item"><span>'+r[i].body+'</span></li></a>'
-                                                )
-                                        }
-                                },
-                                error: function(r) {
-                                        console.log(r)
-                                }
-                        })
-                })
 
                        $.ajax({
 
@@ -41,13 +17,13 @@
                                                 $('.timelineposts').html(
                                                         $('.timelineposts').html() +
 
-                                                        '<li class="list-group-item" id="'+posts[index].PostId+'"><blockquote><p>'+posts[index].PostBody+'</p><footer>Posted by '+posts[index].PostedBy+' on '+posts[index].PostDate+'<button class="btn btn-default" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;" data-id=\"'+posts[index].PostId+'\"> <span class="glyphicon glyphicon-heart" ></span> '+posts[index].Likes+' Likes</span></button><button class="btn btn-default comment" data-postid=\"'+posts[index].PostId+'\" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"><i class="glyphicon glyphicon-flash" style="color:#f9d616;"></i><span style="color:#f9d616;"> Comments</span></button></footer></blockquote></li>'
+                                                        '<li class="list-group-item" id="'+posts[index].PostId+'"><blockquote><p>'+posts[index].PostBody+'</p><footer>Posted by '+posts[index].Postedby+' on '+posts[index].PostDate+'<button class="btn btn-default" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;" data-id=\"'+posts[index].PostId+'\"> <span class="glyphicon glyphicon-heart" ></span> '+posts[index].Likes+' Likes</span></button><button class="btn btn-default comment" data-postid=\"'+posts[index].PostId+'\" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"><i class="glyphicon glyphicon-flash" style="color:#f9d616;"></i><span style="color:#f9d616;"> Comments</span></button></footer><a href="post.php?id='+posts[index].PostId+'">Read More </a></blockquote></li>'
                                                 )
                                         } else {
                                                 $('.timelineposts').html(
                                                         $('.timelineposts').html() +
 
-                                                        '<li class="list-group-item" id="'+posts[index].PostId+'"><blockquote><p>'+posts[index].PostBody+'</p><img src="" data-tempsrc="'+posts[index].PostImage+'" class="postimg" id="img'+posts[index].postId+'"><footer>Posted by '+posts[index].PostedBy+' on '+posts[index].PostDate+'<button class="btn btn-default" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;" data-id=\"'+posts[index].PostId+'\"> <span class="glyphicon glyphicon-heart" ></span> '+posts[index].Likes+' Likes</span></button><button class="btn btn-default comment" data-postid=\"'+posts[index].PostId+'\" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"><i class="glyphicon glyphicon-flash" style="color:#f9d616;"></i><span style="color:#f9d616;"> Comments</span></button></footer></blockquote></li>'
+                                                        '<li class="list-group-item" id="'+posts[index].PostId+'"><blockquote><p>'+posts[index].PostBody+'</p><img src="" data-tempsrc="'+posts[index].PostImage+'" class="postimg" id="img'+posts[index].postId+'"><footer>Posted by '+posts[index].PostedBy+' on '+posts[index].PostDate+'<button class="btn btn-default" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;" data-id=\"'+posts[index].PostId+'\"> <span class="glyphicon glyphicon-heart" ></span> '+posts[index].Likes+' Likes</span></button><button class="btn btn-default comment" data-postid=\"'+posts[index].PostId+'\" type="button" style="color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;"><i class="glyphicon glyphicon-flash" style="color:#f9d616;"></i><span style="color:#f9d616;"> Comments</span></button></footer><a href="post.php?id='+posts[index].PostId+'">Read More </a></blockquote></li>'
                                                 )
                                         }
 
@@ -57,7 +33,7 @@
                                                 $.ajax({
 
                                                         type: "GET",
-                                                        url: "api/comments?postid=" + $(this).attr('data-postid'),
+                                                        url: "api/comments?postid=" + buttonid,
                                                         processData: false,
                                                         contentType: "application/json",
                                                         data: '',
@@ -66,7 +42,7 @@
                                                                 showCommentsModal(res);
                                                         },
                                                         error: function(r) {
-                                                                console.log(r)
+                                                               showCommentsErrorModal();
                                                         }
 
                                                 });
@@ -123,3 +99,8 @@
 
                 $('.modal-body').html(output)
         }
+   function showCommentsErrorModal() {
+        $('.modal').modal('show')
+        var output = "There are no Comments";            
+        $('.modal-body').html(output)        
+    }

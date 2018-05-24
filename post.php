@@ -1,22 +1,35 @@
 <?php
 include('./classes/DB.php');
 include('./classes/Login.php');
-include('./classes/Image.php');
-if (Login::isLoggedIn()) {
-        $userid = Login::isLoggedIn();
-        $User=DB::query('SELECT username,profileimg, description FROM users WHERE id=:userid', array(':userid'=>$userid));
-} else {
-        die('Not logged in');
-}
-
-if (isset($_POST['uploadprofileimg'])) {
-    Image::uploadImage('profileimg',"UPDATE users SET profileimg= :profileimg WHERE id=:userid", array(':userid'=>$userid));
-}
-if (isset($_POST['changeDescription'])) {
-    $str = str_replace(array("\r\n", "\n", "\r"), ' ', htmlentities($_POST['description']));
-   DB::query('UPDATE users SET description=:desc WHERE id=:userid', array(':desc'=>$str, ':userid'=>$userid));
+include('./classes/Notify.php');
+include('./classes/Comment.php');
+$userId=Login::isLoggedIn();
+if (!$userId) {
+    header('Location: login.html');
+    die;
+}else{
+$username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
+     if (isset($_GET['id'])) {
+                $postId=$_GET['id'];
+        $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username` FROM users, posts
+                WHERE users.id = posts.user_id
+                AND posts.id=:postid', array(':postid'=>$postId));
+        $comments=DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$postId));
+           if (!$post) {                
+              die('Post not found!');
+            }
+        if ($_SERVER['REQUEST_METHOD']=='POST')
+        {   
+             if (isset($_POST['post'])) {
+                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', htmlentities($_POST['postbody']));
+                    Comment::createComment($str, $postId, $userId);  
+                }
+                 
+        }
+     }
 }
 ?>
+    <!DOCTYPE html>
     <html>
 
     <head>
@@ -26,6 +39,7 @@ if (isset($_POST['changeDescription'])) {
         <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
         <link rel="stylesheet" href="assets/css/Footer-Dark.css">
+        <link rel="stylesheet" href="assets/css/Highlight-Clean.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.css">
         <link rel="stylesheet" href="assets/css/Login-Form-Clean.css">
         <link rel="stylesheet" href="assets/css/Navigation-Clean1.css">
@@ -47,13 +61,13 @@ if (isset($_POST['changeDescription'])) {
                         <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
                             <li role="presentation">
-                                <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
+                                <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
                             <li class="divider" role="presentation"></li>
                             <li role="presentation"><a href="index.php">Timeline </a></li>
                             <li role="presentation"><a href="messages.php">Messages </a></li>
                             <li role="presentation"><a href="notify.php">Notifications </a></li>
-                            <li role="presentation" class="active"><a href="my_account.php">Account Managment</a></li>
-                            <li role="presentation"><a href="change_password.php">Password change</a></li>                            
+                            <li role="presentation"><a href="my_account.php">Account Managment</a></li>
+                            <li role="presentation"><a href="change_password.php">Password change</a></li>
                             <li role="presentation"><a href="logout.php">Logout </a></li>
                         </ul>
                     </div>
@@ -80,12 +94,12 @@ if (isset($_POST['changeDescription'])) {
                             <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">User <span class="caret"></span></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
+                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
                                     <li role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
-                                    <li role="presentation" class="active" ><a href="my_account.php">Account Managment</a></li>
+                                    <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                     <li role="presentation"><a href="change_password.php">Password change</a></li>
                                     <li role="presentation"><a href="logout.php">Logout </a></li>
                                 </ul>
@@ -97,13 +111,13 @@ if (isset($_POST['changeDescription'])) {
                             <li role="presentation"><a href="notify.php">Notifications</a></li>
                             <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">User <span class="caret"></span></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
+                                    <li class="active" role="presentation">
+                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
                                     <li role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
-                                    <li role="presentation" class="active"><a href="my_account.php">Account Managment</a></li>
+                                    <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                     <li role="presentation"><a href="change_password.php">Password change</a></li>
                                     <li role="presentation"><a href="logout.php">Logout </a></li>
                                 </ul>
@@ -113,58 +127,64 @@ if (isset($_POST['changeDescription'])) {
                 </div>
             </nav>
         </div>
-        <div class="container">
-            <div class="timelineposts">
+        <div>
+            <div class="container">
                 <div class="row">
-                    <h1 class="text-center">My Account</h1>
-                    <div class="col-md-6 text-center">
-                        <h2>Your Image:</h2>
-                        <img src="" data-tempsrc="<?php echo $User[0]['profileimg']?>" class="postimg">
-
-                        <form action="my_account.php" method="post" enctype="multipart/form-data">
-                            <div>
-                                <h4>Upload a profile image:</h4>
-                                <input class="inline-input" type="file" name="profileimg">
-                                <button class="btn btn-primary" type="submit" name="uploadprofileimg">Upload Image</button>
-                            </div>
-
-                        </form>
+                    <div class="col-md-2">
                     </div>
-                    <div class="col-md-6 text-center">
-                        <h2>Your Description:</h2>
-                        <p>
-                            <?php
-                                if(empty($User[0]['description'])){
-                                    echo "You don't have a description yet";
-                                }else{
-                                   echo $User[0]['description']; 
+                    <div class="col-md-8">
+                        <ul class="list-group">
+                            <div class="timelineposts">
+                                <?php    
+                                echo "<li class='list-group-item' id='".$post[0]['id']."'><blockquote><p>".$post[0]['body']."</p>";
+                                if ($post[0]['postimg']!=""){
+                                    echo "<img data-tempsrc='".$post[0]['postimg']."' class='postimg'>";
                                 }
-                                
-                            ?>
-                        </p>
-                        <form action="my_account.php" method="post" enctype="multipart/form-data">
-                            <div>
-                                <h4>Change your description:</h4>
-                                <textarea type="text" name="description" required rows="4" cols="70"></textarea>
-                                <button class="btn btn-primary" type="submit" name="changeDescription">Change</button>
+                                echo "<footer>Posted by '".$post[0]['username']."' on ".$post[0]['posted_at'];
+                                echo "<button class='btn btn-default' type='button' style='color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;' data-id=".$post[0]['id']."> <span class='glyphicon glyphicon-heart' ></span> ".$post[0]['likes']." Likes</span></button></footer>"   
+                                ?>
+                                <form action="" method="post" enctype="multipart/form-data">
+                                    <textarea name="postbody" rows="8" cols="70" required></textarea>
+                                    <input type="submit" name="post" value="Comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">
+                                    <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+                                </form>
+                                <?php
+                                    echo "</blockquote></li>";
+                                ?>
+                                    <li class='list-group-item'>
+                                        <blockquote>
+                                            <p>
+                                                <?php 
+                                            if (!empty($comments)){
+                                                foreach ($comments as $comment){
+                                                    echo $comment['comment']." ~ ".$comment['username'];
+                                                    echo "<hr />";
+                                                }
+                                            }  
+                                        ?>
+                                            </p>
+                                        </blockquote>
+                                    </li>
                             </div>
-
-                        </form>
+                        </ul>
+                    </div>
+                    <div class="col-md-2">
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="footer-dark nav navbar-fixed-bottom">
+        <div class="footer-dark">
             <footer>
                 <div class="container">
-                    <p class="copyright">Valerijs Diks© 2017/2018</p>
+                    <p class="copyright">Valerijs Diks @ 2017/2018</p>
                 </div>
             </footer>
         </div>
-        <script src="assets/js/jquery.min.js"></script>
-        <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-        <script src="assets/js/bs-animation.js"></script>
-        <script src="assets/js/my_account.js"></script>
-        <script src="assets/js/searchbox.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
+    </body>
+
+    </html>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/bs-animation.js"></script>
+    <script src="assets/js/post.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>

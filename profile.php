@@ -10,8 +10,9 @@ $verified = False;
 $isFollowing = False;
 if (isset($_GET['username'])) {
         if (DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))) {
-
+                
                 $username = DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['username'];
+                $description= DB::query('SELECT description FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['description'];
                 $userid = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['id'];
                 $verified = DB::query('SELECT verified FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['verified'];
                 $followerid = Login::isLoggedIn();
@@ -56,8 +57,7 @@ if (isset($_GET['username'])) {
                 }
                 if (isset($_POST['post'])) {
                     $str = str_replace(array("\r\n", "\n", "\r"), ' ', $_POST['postbody']);
-                        if ($_FILES['postimg']['size'] == 0) {
-                            
+                        if ($_FILES['postimg']['size'] == 0) {                            
                                 Post::createPost($str, Login::isLoggedIn(), $userid);
                         } else {
                                 $postid = Post::createImgPost($str, Login::isLoggedIn(), $userid);
@@ -107,6 +107,7 @@ if (isset($_GET['username'])) {
                             <li role="presentation"><a href="index.php">Timeline </a></li>
                             <li role="presentation"><a href="messages.php">Messages </a></li>
                             <li role="presentation"><a href="notify.php">Notifications </a></li>
+                            <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                             <li role="presentation"><a href="change_password.php">Password change</a></li>
                             <li role="presentation"><a href="logout.php">Logout </a></li>
                         </ul>
@@ -139,6 +140,7 @@ if (isset($_GET['username'])) {
                                     <li role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                    <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                     <li role="presentation"><a href="change_password.php">Password change</a></li>
                                     <li role="presentation"><a href="logout.php">Logout </a></li>
                                 </ul>
@@ -156,6 +158,7 @@ if (isset($_GET['username'])) {
                                     <li role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                    <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                     <li role="presentation"><a href="change_password.php">Password change</a></li>
                                     <li role="presentation"><a href="logout.php">Logout </a></li>
                                 </ul>
@@ -176,7 +179,16 @@ if (isset($_GET['username'])) {
                     <div class="col-md-3">
                         <ul class="list-group">
                             <li class="list-group-item"><span><strong>About Me</strong></span>
-                                <p>Welcome to my profile bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;bla bla&nbsp;</p>
+                                <p>
+                                    <?php  
+                                    
+                                    if(empty($description)){
+                                        echo "No description";
+                                    }else{
+                                       echo $description;
+                                    }                                   
+                                    ?>
+                                </p>
                             </li>
                         </ul>
                     </div>
@@ -229,7 +241,6 @@ if (isset($_GET['username'])) {
                     </div>
                     <form action="profile.php?username=<?php echo $username; ?>" method="post" enctype="multipart/form-data">
                         <div style="max-height: 400px; overflow-y: auto">
-
                             <textarea name="postbody" rows="8" cols="80"></textarea>
                             <br />Upload an image:
                             <input type="file" name="postimg">
@@ -255,6 +266,7 @@ if (isset($_GET['username'])) {
         <script src="assets/bootstrap/js/bootstrap.min.js"></script>
         <script src="assets/js/bs-animation.js"></script>
         <script src="assets/js/profile.js"></script>
+        <script src="assets/js/searchbox.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
 
     </body>
