@@ -206,4 +206,6 @@ div.searchbox {
     bottom:0px;
   }
 }
-
+.inline-input{
+    display:inline !important;
+}

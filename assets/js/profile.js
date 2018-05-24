@@ -1,6 +1,8 @@
     var username = document.getElementById("user").className;
     var start = 5;
     var working = false;
+
+
     $(window).scroll(function () {
         if ($(this).scrollTop() + 1 >= $('body').height() - $(window).height()) {
             if (working == false) {
@@ -46,7 +48,7 @@
                                         showCommentsModal(res,buttonid);
                                     },
                                     error: function (r) {
-                                        console.log(r)
+                                        showCommentsErrorModal();
                                     }
 
                                 });
@@ -152,7 +154,7 @@
                                 showCommentsModal(res,buttonid);
                             },
                             error: function (r) {
-                                console.log(r)
+                                showCommentsErrorModal();
                             }
 
                         });
@@ -183,7 +185,7 @@
                     this.src = $(this).attr('data-tempsrc')
                     this.onload = function () {
                         this.style.opacity = '1';
-                        this.style.width = '100%';
+                        this.style.width = '100%';                       
                     }
                 })
 
@@ -211,5 +213,11 @@
             output += res[i].CommentedBy;
             output += "<hr />";
         }     
+        $('.modal-body').html(output)        
+    }
+
+   function showCommentsErrorModal() {
+        $('#commentsmodal').modal('show')
+        var output = "There are no Comments";            
         $('.modal-body').html(output)        
     }

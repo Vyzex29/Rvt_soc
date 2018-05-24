@@ -1,29 +1,5 @@
         $(document).ready(function() {
 
-                $('.sbox').keyup(function() {
-                        $('.autocomplete').html("")
-                        $.ajax({
-
-                                type: "GET",
-                                url: "api/search?query=" + $(this).val(),
-                                processData: false,
-                                contentType: "application/json",
-                                data: '',
-                                success: function(r) {
-                                        r = JSON.parse(r)
-                                        for (var i = 0; i < r.length; i++) {
-                                                console.log(r[i].body)
-                                                $('.autocomplete').html(
-                                                        $('.autocomplete').html() +
-                                                        '<a href="profile.php?username='+r[i].username+'#'+r[i].id+'"><li class="list-group-item"><span>'+r[i].body+'</span></li></a>'
-                                                )
-                                        }
-                                },
-                                error: function(r) {
-                                        console.log(r)
-                                }
-                        })
-                })
 
                        $.ajax({
 
@@ -57,7 +33,7 @@
                                                 $.ajax({
 
                                                         type: "GET",
-                                                        url: "api/comments?postid=" + $(this).attr('data-postid'),
+                                                        url: "api/comments?postid=" + buttonid,
                                                         processData: false,
                                                         contentType: "application/json",
                                                         data: '',
@@ -66,7 +42,7 @@
                                                                 showCommentsModal(res);
                                                         },
                                                         error: function(r) {
-                                                                console.log(r)
+                                                               showCommentsErrorModal();
                                                         }
 
                                                 });
@@ -123,3 +99,8 @@
 
                 $('.modal-body').html(output)
         }
+   function showCommentsErrorModal() {
+        $('.modal').modal('show')
+        var output = "There are no Comments";            
+        $('.modal-body').html(output)        
+    }

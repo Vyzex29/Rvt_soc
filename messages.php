@@ -44,6 +44,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                         <li role="presentation"><a href="index.php">Timeline </a></li>
                         <li role="presentation"><a href="messages.php">Messages </a></li>
                         <li role="presentation"><a href="notify.php">Notifications </a></li>
+                        <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                         <li role="presentation"><a href="change_password.php">Password change</a></li>
                         <li role="presentation"><a href="logout.php">Logout </a></li>
                     </ul>
@@ -75,6 +76,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li class="active" role="presentation"><a href="messages.php">Messages </a></li>
                                 <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
                                 <li role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
@@ -91,6 +93,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li class="active" role="presentation"><a href="messages.php">Messages </a></li>
                                 <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
                                 <li role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
@@ -129,6 +132,10 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
             </div>
         </footer>
     </div>
+
+</body>
+
+</html>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="assets/js/bs-animation.js"></script>
@@ -152,7 +159,8 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
             $(window).on('hashchange', function() {
                     location.reload()
             })
-            $('#sendmessage').click(function() {
+        
+                $('#sendmessage').click(function() {
                     $.ajax({
                             type: "POST",
                             url: "api/message",
@@ -214,6 +222,4 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
              })
     })
     </script>
-</body>
-
-</html>
+<script src="assets/js/searchbox.js"></script>

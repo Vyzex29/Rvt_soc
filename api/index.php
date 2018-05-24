@@ -61,15 +61,22 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                 echo $username;
         } else if ($_GET['url'] == "comments" && isset($_GET['postid'])) {
                 $output = "";
-                $comments = $db->query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$_GET['postid']));
+                $comments = $db->query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$_GET['postid']));                
                 $output .= "[";
-                foreach($comments as $comment) {
-                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', $comment['comment']);
-                        $output .= "{";
-                        $output .= '"Comment": "'.$str.'",';
-                        $output .= '"CommentedBy": "'.$comment['username'].'"';
-                        $output .= "},";
-                        
+                if (empty($comments)){
+                     $output .= "{";
+                    $output .= '"Comment": "There are no comments",';
+                    $output .= '"CommentedBy": "System"';
+                    $output .= "},";
+                }else{
+                    foreach($comments as $comment) {
+                        $str = str_replace(array("\r\n", "\n", "\r"), ' ', $comment['comment']);
+                            $output .= "{";
+                            $output .= '"Comment": "'.$str.'",';
+                            $output .= '"CommentedBy": "'.$comment['username'].'"';
+                            $output .= "},";
+
+                    }
                 }
                 $output = substr($output, 0, strlen($output)-1);
                 $output .= "]";
@@ -196,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                                         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                                             if ($password==$confirmpassword){
                                                    if (!$db->query('SELECT email FROM users WHERE email=:email', array(':email'=>$email))) {
-                                                    $db->query('INSERT INTO users VALUES (null, :username, :password, :email, "0", null)', array(':username'=>$username, ':password'=>password_hash($password, PASSWORD_BCRYPT), ':email'=>$email));
+                                                    $db->query('INSERT INTO users VALUES (null, :username, :password, :email, "0", null, null)', array(':username'=>$username, ':password'=>password_hash($password, PASSWORD_BCRYPT), ':email'=>$email));
                                                     Mail::sendMail('Welcome to our Social Network!', 'Your account has been created!', $email);
                                                     echo '{ "Success": "User Created!" }';
                                                     http_response_code(200);
