@@ -102,7 +102,7 @@
 
 .message-from-me {
   width:50%;
-  background-color:#f90b44;
+  background-color:#3b7c0b;
   min-height:40px;
   border-radius:10px;
   float:right;
@@ -123,11 +123,10 @@
   margin-bottom:0px;
 }
 
-.msg-send-button {
-}
+
 
 .btn.btn-default.msg-button-send:hover {
-  background-color:#f50530;
+  background-color:#316808;
   color:#FFF;
 }
 

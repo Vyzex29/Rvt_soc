@@ -69,7 +69,7 @@ if (Login::isLoggedIn()) {
     <link rel="stylesheet" href="assets/css/Login-Form-Clean.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean1.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/untitled.css">
+    <link rel="stylesheet" href="assets/css/index.css">
 </head>
 
 <body>
@@ -121,7 +121,7 @@ if (Login::isLoggedIn()) {
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li role="presentation"><a href="messages.php">Messages </a></li>
                                 <li role="presentation"><a href="notify.php">Notifications </a></li>
-                                <li role="presentation"><a href="change_password.php">Password change</a></li>
+                                <li class="active" role="presentation"><a href="change_password.php">Password change</a></li>
                                 <li role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
                         </li>
