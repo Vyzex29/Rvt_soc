@@ -228,7 +228,6 @@ if (isset($_GET['username'])) {
                     </div>
                     <form action="profile.php?username=<?php echo $username; ?>" method="post" enctype="multipart/form-data">
                         <div style="max-height: 400px; overflow-y: auto">
-
                             <textarea name="postbody" rows="8" cols="80"></textarea>
                             <br />Upload an image:
                             <input type="file" name="postimg">

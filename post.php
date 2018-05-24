@@ -3,22 +3,30 @@ include('./classes/DB.php');
 include('./classes/Login.php');
 include('./classes/Notify.php');
 include('./classes/Comment.php');
-if (!Login::isLoggedIn()) {
+$userId=Login::isLoggedIn();
+if (!$userId) {
     header('Location: login.html');
     die;
 }else{
 $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
-    if (isset($_GET['id'])) {
+     if (isset($_GET['id'])) {
+                $postId=$_GET['id'];
         $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username` FROM users, posts
                 WHERE users.id = posts.user_id
-                AND posts.id=:postid 
-        ', array(':postid'=>$_GET['id']));
-            if ($post) {                
-                   
-            }else{
-                die('Post not found!');
+                AND posts.id=:postid', array(':postid'=>$postId));
+        $comments=DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$postId));
+           if (!$post) {                
+              die('Post not found!');
             }
-    }
+        if ($_SERVER['REQUEST_METHOD']=='POST')
+        {   
+             if (isset($_POST['post'])) {
+                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', htmlentities($_POST['postbody']));
+                    Comment::createComment($str, $postId, $userId);  
+                }
+                 
+        }
+     }
 }
 ?>
     <!DOCTYPE html>
@@ -132,14 +140,28 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 echo "<footer>Posted by '".$post[0]['username']."' on ".$post[0]['posted_at'];
                                 echo "<button class='btn btn-default' type='button' style='color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;' data-id=".$post[0]['id']."> <span class='glyphicon glyphicon-heart' ></span> ".$post[0]['likes']." Likes</span></button></footer>"   
                                 ?>
-                                <form method="POST" action="post.php?id=<?php echo $post[0]['id']?> " enctype="text/plain">
-                                    <textarea name="commentbody" rows="4" cols="70">
-                                </textarea>
-                                    <input type="submit" name="submitComment" value="comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">
+                                <form action="" method="post" enctype="multipart/form-data">
+                                    <textarea name="postbody" rows="8" cols="70" required></textarea>
+                                    <input type="submit" name="post" value="Comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">
+                                    <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
                                 </form>
                                 <?php
                                     echo "</blockquote></li>";
                                 ?>
+                                    <li class='list-group-item'>
+                                        <blockquote>
+                                            <p>
+                                                <?php 
+                                            if (!empty($comments)){
+                                                foreach ($comments as $comment){
+                                                    echo $comment['comment']." ~ ".$comment['username'];
+                                                    echo "<hr />";
+                                                }
+                                            }  
+                                        ?>
+                                            </p>
+                                        </blockquote>
+                                    </li>
                             </div>
                         </ul>
                     </div>
@@ -148,7 +170,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                 </div>
             </div>
         </div>
-        <div class="footer-dark navbar-fixed-bottom">
+        <div class="footer-dark">
             <footer>
                 <div class="container">
                     <p class="copyright">Valerijs Diks @ 2017/2018</p>
@@ -163,4 +185,3 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
     <script src="assets/js/bs-animation.js"></script>
     <script src="assets/js/post.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
-    

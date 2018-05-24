@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
                         $output .= '"Comment": "'.$str.'",';
                         $output .= '"CommentedBy": "'.$comment['username'].'"';
                         $output .= "},";
-                        //echo $comment['comment']." ~ ".$comment['username']."<hr />";
+                        
                 }
                 $output = substr($output, 0, strlen($output)-1);
                 $output .= "]";
