@@ -5,7 +5,7 @@ if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{
-$username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
+$user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
 
 }?>
 <!DOCTYPE html>
@@ -30,16 +30,18 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
     <header class="hidden-sm hidden-md hidden-lg">
         <div class="searchbox">
             <form>
-                <h1 class="text-left">Social Network</h1>
+                <h1 class="text-left">RVT SOC</h1>
                 <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
                     <input class="form-control sbox" type="text">
                     <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
                     </ul>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span></button>
+                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span>
+                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar">
+                    </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                        <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                         <li class="divider" role="presentation"></li>
                         <li role="presentation"><a href="index.php">Timeline </a></li>
                         <li role="presentation"><a href="messages.php">Messages </a></li>
@@ -69,9 +71,9 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                     </form>
                     <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
                         <li role="presentation"><a href="index.php">My Timeline</a></li>
-                        <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">User <span class="caret"></span></a>
+                        <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#"><?php echo $user[0]['username']?> <span class="caret"></span><img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                 <li class="divider" role="presentation"></li>
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li class="active" role="presentation"><a href="messages.php">Messages </a></li>
@@ -86,9 +88,10 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                         <li role="presentation"><a href="index.php">Timeline</a></li>
                         <li class="active" role="presentation"><a href="messages.php">Messages</a></li>
                         <li role="presentation"><a href="notify.php">Notifications</a></li>
-                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">User <span class="caret"></span></a>
+                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#"><?php echo $user[0]['username']?>
+                            <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                 <li class="divider" role="presentation"></li>
                                 <li role="presentation"><a href="index.php">Timeline </a></li>
                                 <li class="active" role="presentation"><a href="messages.php">Messages </a></li>
@@ -125,7 +128,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
             </div>
         </div>
     </div>
-    <div class="footer-dark navbar-bottom">
+    <div class="footer-dark navbar-fixed-bottom">
         <footer>
             <div class="container">
                 <p class="copyright">Valerijs Diks 2017/2018</p>
@@ -221,5 +224,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                     }
              })
     })
+         
     </script>
 <script src="assets/js/searchbox.js"></script>
+<script src="assets/js/pictureRender.js"></script>
