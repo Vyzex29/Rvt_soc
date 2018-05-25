@@ -2,7 +2,7 @@
   form.navbar-form.navbar-left {
     min-width:0;
     display:inline;
-    width:56%;
+    width:40%;
     margin:8px 0px 0px -10px;
   }
 }
@@ -75,7 +75,7 @@ i.glyphicon.glyphicon-search {
 
 @media (max-width:767px) {
   header {
-    background-color:#ff4c4c;
+    background-color:#316808;
   }
 }
 
@@ -208,4 +208,10 @@ div.searchbox {
 }
 .inline-input{
     display:inline !important;
+}
+
+.avatar{
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 14px !important;
 }
