@@ -6,8 +6,8 @@ class Post {
                 }
                 $topics = self::getTopics($postbody);
                 if ($loggedInUserId == $profileUserId) {
-                        if (count(Notify::createNotify($postbody)) != 0) {
-                                foreach (self::notify($postbody) as $key => $n) {
+                        if (count(self::createNotify($postbody)) != 0) {
+                                foreach (self::createNotify($postbody) as $key => $n) {
                                         $s = $loggedInUserId;
                                         $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
                                         if ($r != 0) {
@@ -27,8 +27,8 @@ class Post {
                 }
             $topics=self::getTopics($postbody);
                 if ($loggedInUserId == $profileUserId) {
-                      if (count(Notify::createNotify($postbody)) != 0) {
-                                foreach (self::notify($postbody) as $key => $n) {
+                      if (count(self::createNotify($postbody)) != 0) {
+                                foreach (self::createNotify($postbody) as $key => $n) {
                                         $s = $loggedInUserId;
                                         $r = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$key))[0]['id'];
                                         if ($r != 0) {
@@ -47,7 +47,7 @@ class Post {
                 if (!DB::query('SELECT user_id FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId))) {
                         DB::query('UPDATE posts SET likes=likes+1 WHERE id=:postid', array(':postid'=>$postId));
                         DB::query('INSERT INTO posts_likes VALUES (null, :postid, :userid)', array(':postid'=>$postId, ':userid'=>$likerId));
-                        Notify::createNotify("",$postId);
+                        self::createNotify("",$postId);
                 } else {
                         DB::query('UPDATE posts SET likes=likes-1 WHERE id=:postid', array(':postid'=>$postId));
                         DB::query('DELETE FROM posts_likes WHERE post_id=:postid AND user_id=:userid', array(':postid'=>$postId, ':userid'=>$likerId));
@@ -80,6 +80,23 @@ class Post {
                 }    
             }
             return $newstring;
+        }
+        
+            public static function createNotify($text = "", $postid = 0) {
+                $text = explode(" ", $text);
+                $notify = array();
+                foreach ($text as $word) {
+                        if (substr($word, 0, 1) == "@") {
+                                $notify[substr($word, 1)] = array("type"=>1, "extra"=>' { "postbody": "'.htmlentities(implode($text, " ")).'" } ');
+                        }
+                }
+                if (count($text) == 1 && $postid != 0) {
+                        $temp = DB::query('SELECT posts.user_id AS receiver, posts_likes.user_id AS sender FROM posts, posts_likes WHERE posts.id = posts_likes.post_id AND posts.id=:postid', array(':postid'=>$postid));
+                        $r = $temp[0]["receiver"];
+                        $s = $temp[0]["sender"];
+                        DB::query('INSERT INTO notifications VALUES (null, :type, :receiver, :sender, :extra)', array(':type'=>2, ':receiver'=>$r, ':sender'=>$s, ':extra'=>""));
+                }
+                return $notify;
         }
     
         public static function displayPosts($userid, $username, $loggedInUserId) {  //diplays from multiple sql ,depending on user and posts
