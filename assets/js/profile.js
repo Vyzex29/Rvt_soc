@@ -1,7 +1,7 @@
-    var username = document.getElementById("user").className;
+var username = document.getElementById("user").className;
     var start = 5;
     var working = false;
-
+    
 
     $(window).scroll(function () {
         if ($(this).scrollTop() + 1 >= $('body').height() - $(window).height()) {
