@@ -1,7 +1,6 @@
 <?php
 include('./classes/DB.php');
 include('./classes/Login.php');
-include('./classes/Notify.php');
 include('./classes/Comment.php');
 $userId=Login::isLoggedIn();
 if (!$userId) {
@@ -11,10 +10,11 @@ if (!$userId) {
 $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
      if (isset($_GET['id'])) {
                 $postId=$_GET['id'];
-        $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username` FROM users, posts
+        $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username`, users.id as userid FROM users, posts
                 WHERE users.id = posts.user_id
                 AND posts.id=:postid', array(':postid'=>$postId));
-        $comments=DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$postId));
+         $authorId=$post[0]['userid'];
+         $comments=DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$postId));
            if (!$post) {                
               die('Post not found!');
             }
@@ -23,6 +23,12 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
              if (isset($_POST['post'])) {
                     $str = str_replace(array("\r\n", "\n", "\r"), ' ', htmlentities($_POST['postbody']));
                     Comment::createComment($str, $postId, $userId);  
+                }
+                  if (isset($_POST['deletepost'])) {
+                        if (DB::query('SELECT id FROM posts WHERE id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid))) {
+                                DB::query('DELETE FROM posts WHERE id=:postid and user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid));
+                                DB::query('DELETE FROM posts_likes WHERE post_id=:postid', array(':postid'=>$_GET['postid']));
+                        }
                 }
                  
         }
@@ -51,7 +57,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
         <header class="hidden-sm hidden-md hidden-lg">
             <div class="searchbox">
                 <form>
-                    <h1 class="text-left">Social Network</h1>
+                    <h1 class="text-left">RVT Soc</h1>
                     <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
                         <input class="form-control sbox" type="text">
                         <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
@@ -136,17 +142,22 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                         <ul class="list-group">
                             <div class="timelineposts">
                                 <?php    
+                                if ($userId==$authorId){
+                                     echo   "<form action=''method='post' enctype='multipart/form-data'>
+                                            <input type='submit' name='deletepost' class='align-right'value='DELETE' />
+                                        </form> ";
+                                   
+                                }
                                 echo "<li class='list-group-item' id='".$post[0]['id']."'><blockquote><p>".$post[0]['body']."</p>";
                                 if ($post[0]['postimg']!=""){
                                     echo "<img data-tempsrc='".$post[0]['postimg']."' class='postimg'>";
                                 }
-                                echo "<footer>Posted by '".$post[0]['username']."' on ".$post[0]['posted_at'];
+                                echo "<footer>Posted by ".$post[0]['username']." on ".$post[0]['posted_at'];
                                 echo "<button class='btn btn-default' type='button' style='color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;' data-id=".$post[0]['id']."> <span class='glyphicon glyphicon-heart' ></span> ".$post[0]['likes']." Likes</span></button></footer>"   
                                 ?>
                                 <form action="" method="post" enctype="multipart/form-data">
                                     <textarea name="postbody" rows="8" cols="70" required></textarea>
                                     <input type="submit" name="post" value="Comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">
-                                    <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
                                 </form>
                                 <?php
                                     echo "</blockquote></li>";

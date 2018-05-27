@@ -3,7 +3,6 @@ include('./classes/DB.php');
 include('./classes/Login.php');
 include('./classes/Post.php');
 include('./classes/Image.php');
-include('./classes/Notify.php');
 include('./classes/Comment.php');
 $username = "";
 $verified = False;
@@ -49,12 +48,7 @@ if (isset($_GET['username'])) {
                         $isFollowing = True;
                 }
 
-                if (isset($_POST['deletepost'])) {
-                        if (DB::query('SELECT id FROM posts WHERE id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid))) {
-                                DB::query('DELETE FROM posts WHERE id=:postid and user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid));
-                                DB::query('DELETE FROM posts_likes WHERE post_id=:postid', array(':postid'=>$_GET['postid']));
-                        }
-                }
+          
                 if (isset($_POST['post'])) {
                     $str = str_replace(array("\r\n", "\n", "\r"), ' ', $_POST['postbody']);
                         if ($_FILES['postimg']['size'] == 0) {                            
