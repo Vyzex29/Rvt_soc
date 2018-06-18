@@ -5,8 +5,13 @@ if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{
-$user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
-$allUsers = DB::query('SELECT username, profileimg FROM users');
+    $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
+    $allUsers = DB::query('SELECT username, profileimg FROM users');
+    $LastPost = DB::query('SELECT *,count(*) as count FROM `posts` ORDER BY `posted_at`DESC LIMIT 1')[0];
+    $NewestPost = DB::query('SELECT * FROM `posts` ORDER BY `posted_at` LIMIT 1')[0];
+    $Comment = DB::query('SELECT *, count(*) as count FROM `comments` ORDER BY `posted_at`DESC LIMIT 1')[0];
+    $LatestUser = DB::query('SELECT * FROM `users` ORDER BY `id`  DESC LIMIT 1')[0];
+    $UserCount = DB::query('SELECT count(*) FROM `users`')[0];
 }
 ?>
 
@@ -144,13 +149,14 @@ $allUsers = DB::query('SELECT username, profileimg FROM users');
                         <h3 class="text-center">Posts</h3>
                         <div class="media-body">
                             <div class="col-md-4">
-                                <h4>Total Count : <small><b>132</b></small></h4>
+                               <?php echo "<h4>Total Count : <small><b>".$LastPost['count']." </b></small></h4>";?>
                             </div>
                             <div class="col-md-4">
-                                <h4>Most popular:<small><a><b>Youjo senki artwork </b><br></a><i>Posted on January 31, 2018</i></small></h4>
+                                <?php echo "<h4>Most popular:<small><a href='post.php?id=".$LastPost['id']."'><b>".$LastPost['body']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
+                            
                             </div>
                             <div class="col-md-4">
-                                <h4>Newest: <small><a><b>RVT post</b> </a><br><i>Posted on June 13, 2018</i></small></h4>
+                                <?php echo "<h4>Newest:<small><a href='post.php?id=".$NewestPost['id']."'><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i></small></h4>" ?>
                             </div>
                             <button type="button" class="btn btn-success btn-block">Export to pdf</button>
                         </div>
@@ -162,10 +168,10 @@ $allUsers = DB::query('SELECT username, profileimg FROM users');
                         <h3 class="text-center">Comments</h3>
                         <div class="media-body">
                             <div class="col-md-6">
-                                <h4>Total Count : <small><b>420</b></small></h4>
+                                <?php echo "<h4>Total Count : <small><b>".$Comment['count']." </b></small></h4>";?>
                             </div>
                             <div class="col-md-6">
-                                <h4>Newest: <small><a><b>Cool logo</b> </a><br><i>Posted on June 13, 2018</i> by General </small></h4>
+                                   <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
                             </div>
                             <button type="button" class="btn btn-success btn-block">Export to pdf</button>
                         </div>
@@ -173,18 +179,17 @@ $allUsers = DB::query('SELECT username, profileimg FROM users');
                     </div>
                 </div>
                 <div>
+                    
                     <div class="media border p-3">
                         <h3 class="text-center">Users</h3>
                         <div class="media-body">
-                            <div class="col-md-4">
-                                <h4>Total Count : <small><b>6</b></small></h4>
+                            <div class="col-md-6">
+                                <?php echo "<h4>Total Count : <small><b>".$UserCount[0]." </b></small></h4>";?>
                             </div>
-                            <div class="col-md-4">
-                                <h4>Online:<small><b>2</b></small></h4>
+                            <div class="col-md-6">
+                                <?php echo "<h4>Latest joiner: <small><a href='profile.php?username=".$LatestUser['username']."'><b>".$LatestUser['username']."</b><br></a></small></h4>"?>
                             </div>
-                            <div class="col-md-4">
-                                <h4>This month's joiner count: <small><b>1</b></small></h4>
-                            </div>
+
                             <button type="button" class="btn btn-success btn-block">Export to pdf</button>
                         </div>
                     </div>

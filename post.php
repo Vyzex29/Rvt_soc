@@ -7,17 +7,19 @@ if (!$userId) {
     header('Location: login.html');
     die;
 }else{
-$username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
+     $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
      if (isset($_GET['id'])) {
-                $postId=$_GET['id'];
+        
+         $postId=$_GET['id'];
         $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username`, users.id as userid FROM users, posts
                 WHERE users.id = posts.user_id
                 AND posts.id=:postid', array(':postid'=>$postId));
          $authorId=$post[0]['userid'];
-         $comments=DB::query('SELECT comments.comment, users.username FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id', array(':postid'=>$postId));
+         $comments=DB::query('SELECT comments.comment, comments.posted_at, users.username, users.profileimg FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id ORDER BY comments.posted_at DESC', array(':postid'=>$postId));
            if (!$post) {                
               die('Post not found!');
-            }
+        }
+         
         if ($_SERVER['REQUEST_METHOD']=='POST')
         {   
              if (isset($_POST['post'])) {
@@ -57,19 +59,20 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
         <header class="hidden-sm hidden-md hidden-lg">
             <div class="searchbox">
                 <form>
-                    <h1 class="text-left">RVT Soc</h1>
+                    <h1 class="text-left">RVT SOC</h1>
                     <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
                         <input class="form-control sbox" type="text">
                         <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
                         </ul>
                     </div>
                     <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span></button>
+                        <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
+                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
                             <li role="presentation">
-                                <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                             <li class="divider" role="presentation"></li>
-                            <li role="presentation"><a href="index.php">Timeline </a></li>
+                            <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                             <li role="presentation"><a href="messages.php">Messages </a></li>
                             <li role="presentation"><a href="notify.php">Notifications </a></li>
                             <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -97,12 +100,16 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                         </form>
                         <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
                             <li role="presentation"><a href="index.php">My Timeline</a></li>
-                            <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">User <span class="caret"></span></a>
+                            <li class="dropdown open">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">
+                                    <?php echo $user[0]['username']?>
+                                    <span class="caret"></span>
+                                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                        <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -112,15 +119,18 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                             </li>
                         </ul>
                         <ul class="nav navbar-nav hidden-xs hidden-sm navbar-right">
-                            <li role="presentation"><a href="index.php">Timeline</a></li>
+                            <li class="active" role="presentation"><a href="index.php">Timeline</a></li>
                             <li role="presentation"><a href="messages.php">Messages</a></li>
                             <li role="presentation"><a href="notify.php">Notifications</a></li>
-                            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">User <span class="caret"></span></a>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">
+                                    <?php echo $user[0]['username']?>
+                                    <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li class="active" role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                    <li role="presentation">
+                                        <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -144,7 +154,7 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 <?php    
                                 if ($userId==$authorId){
                                      echo   "<form action=''method='post' enctype='multipart/form-data'>
-                                            <input type='submit' name='deletepost' class='align-right'value='DELETE' />
+                                            <input type='submit' name='deletepost' class='btn btn-primary' align='right' value='X' />
                                         </form> ";
                                    
                                 }
@@ -164,16 +174,21 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
                                 ?>
                                     <li class='list-group-item'>
                                         <blockquote>
-                                            <p>
-                                                <?php 
+                                            <?php 
                                             if (!empty($comments)){
                                                 foreach ($comments as $comment){
-                                                    echo $comment['comment']." ~ ".$comment['username'];
-                                                    echo "<hr />";
+                                                   echo "<div class='media'>
+                                                      <div class='media-left'>
+                                                        <img src='".$comment['profileimg']."' class='media-object' style='width:60px; height:60px; border-radius: 25px;'>
+                                                      </div>
+                                                      <div class='media-body'>
+                                                        <h4 class='media-heading'>".$comment['username']."<small><i>Posted on ".$comment['posted_at']."</i></small></h4>
+                                                        <p>".$comment['comment']."</p>
+                                                      </div>
+                                                    </div>";
                                                 }
                                             }  
                                         ?>
-                                            </p>
                                         </blockquote>
                                     </li>
                             </div>
@@ -196,6 +211,6 @@ $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':use
     </html>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/bs-animation.js"></script>
     <script src="assets/js/post.js"></script>
+    <script src="assets/js/pictureRender.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>

@@ -248,7 +248,7 @@ if (!Login::isLoggedIn()) {
                         <h4 class="modal-title">New Post</h4>
                     </div>
                     <form action="profile.php?username=<?php echo $username; ?>" method="post" enctype="multipart/form-data">
-                        <div style="max-height: 400px; overflow-y: auto">
+                        <div style="max-height: 400px; overflow-y: auto; padding-left:7px">
                             <textarea name="postbody" rows="8" cols="80"></textarea>
                             <br />Upload an image:
                             <input type="file" name="postimg">
@@ -272,7 +272,6 @@ if (!Login::isLoggedIn()) {
         </div>
         <script src="assets/js/jquery.min.js"></script>
         <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-        <script src="assets/js/bs-animation.js"></script>
         <script src="assets/js/profile.js"></script>
         <script src="assets/js/searchbox.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
