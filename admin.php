@@ -5,8 +5,22 @@ if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{
+        if ($_SERVER['REQUEST_METHOD']=='POST')
+        {   
+            $userId=$_POST['userId'];
+             if (isset($_POST['changeRole'])) {
+                $role =(int)$_POST['roleList'];
+               DB::query('UPDATE users SET role=:role WHERE id=:userid', array(':role'=>$role, ':userid'=>$userId));
+            }
+            if (isset($_POST['removeUser'])) {
+                DB::query('DELETE FROM login_tokens WHERE user_id=:userid',array(':userid'=>$userId));
+                DB::query('DELETE FROM users WHERE id=:userid',array(':userid'=>$userId));
+             
+            }
+                 
+        }
     $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
-    $allUsers = DB::query('SELECT username, profileimg FROM users');
+    $allUsers = DB::query('SELECT id,username, profileimg,role FROM users');
     $LastPost = DB::query('SELECT *,count(*) as count FROM `posts` ORDER BY `posted_at`DESC LIMIT 1')[0];
     $NewestPost = DB::query('SELECT * FROM `posts` ORDER BY `posted_at` LIMIT 1')[0];
     $Comment = DB::query('SELECT *, count(*) as count FROM `comments` ORDER BY `posted_at`DESC LIMIT 1')[0];
@@ -130,14 +144,22 @@ if (!Login::isLoggedIn()) {
                     echo '<li class="list-group-item" style="background-color:#FFF;"><span style="font-size:16px;"><strong>'.$userArr['username'].'</strong></span>
                     <img src="" data-tempsrc="'.$userArr['profileimg'].'" class="postimg avatar"></li> ';
                     
-                    echo '      
-                    <select class="form-control" id="sel1">
-                        <option>Administrator</option>
-                        <option selected="selected">User</option>
-                      </select> 
-                    <button type="button" class="btn btn-success btn-block">Change</button>
-                    <button type="button" class="btn btn-danger btn-block">Remove</button>';
-                  
+                    echo ' 
+                    <form action="" method="post" >
+                       <select class="form-control" name="roleList">';
+                        if($userArr['role']==1){
+                            echo '<option value="1" selected="selected">Administrator</option>
+                                <option value="0" >User</option>';
+                        }else{
+                             echo '<option value="1" >Administrator</option>
+                                <option value="0" selected="selected" >User</option>';
+                        }
+                        
+                      echo '</select>
+                        <input type="hidden" name="userId" value="'.$userArr['id'].'"/>
+                        <button type="submit" name="changeRole" class="btn btn-success btn-block" value="changeRole">Change Role</button>
+                        <button type="submit" name="removeUser" class="btn btn-danger btn-block" value="removeUser">Delete User</button>
+                    </form>';
                 }
                 ?>
                 </ul>
@@ -149,11 +171,11 @@ if (!Login::isLoggedIn()) {
                         <h3 class="text-center">Posts</h3>
                         <div class="media-body">
                             <div class="col-md-4">
-                               <?php echo "<h4>Total Count : <small><b>".$LastPost['count']." </b></small></h4>";?>
+                                <?php echo "<h4>Total Count : <small><b>".$LastPost['count']." </b></small></h4>";?>
                             </div>
                             <div class="col-md-4">
                                 <?php echo "<h4>Most popular:<small><a href='post.php?id=".$LastPost['id']."'><b>".$LastPost['body']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
-                            
+
                             </div>
                             <div class="col-md-4">
                                 <?php echo "<h4>Newest:<small><a href='post.php?id=".$NewestPost['id']."'><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i></small></h4>" ?>
@@ -171,7 +193,7 @@ if (!Login::isLoggedIn()) {
                                 <?php echo "<h4>Total Count : <small><b>".$Comment['count']." </b></small></h4>";?>
                             </div>
                             <div class="col-md-6">
-                                   <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
+                                <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
                             </div>
                             <button type="button" class="btn btn-success btn-block">Export to pdf</button>
                         </div>
@@ -179,7 +201,7 @@ if (!Login::isLoggedIn()) {
                     </div>
                 </div>
                 <div>
-                    
+
                     <div class="media border p-3">
                         <h3 class="text-center">Users</h3>
                         <div class="media-body">
