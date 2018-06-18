@@ -128,7 +128,7 @@ $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', arr
             </div>
         </div>
     </div>
-    <div class="footer-dark navbar-fixed-bottom">
+    <div class="footer-dark navbar-bottom">
         <footer>
             <div class="container">
                 <p class="copyright">Valerijs Diks 2017/2018</p>

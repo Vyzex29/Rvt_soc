@@ -1,42 +1,20 @@
 <?php
 include('./classes/DB.php');
 include('./classes/Login.php');
-include('./classes/Comment.php');
-$userId=Login::isLoggedIn();
-if (!$userId) {
+if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{
-     $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
-     if (isset($_GET['id'])) {
-        
-         $postId=$_GET['id'];
-        $post = DB::query('SELECT posts.id, posts.body, posts.posted_at, posts.postimg, posts.likes, users.`username`, users.id as userid FROM users, posts
-                WHERE users.id = posts.user_id
-                AND posts.id=:postid', array(':postid'=>$postId));
-         $authorId=$post[0]['userid'];
-         $comments=DB::query('SELECT comments.comment, comments.posted_at, users.username, users.profileimg FROM comments, users WHERE post_id = :postid AND comments.user_id = users.id ORDER BY comments.posted_at DESC', array(':postid'=>$postId));
-           if (!$post) {                
-              die('Post not found!');
-        }
-         
-        if ($_SERVER['REQUEST_METHOD']=='POST')
-        {   
-             if (isset($_POST['post'])) {
-                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', htmlentities($_POST['postbody']));
-                    Comment::createComment($str, $postId, $userId);  
-                }
-                  if (isset($_POST['deletepost'])) {
-                        if (DB::query('SELECT id FROM posts WHERE id=:postid AND user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid))) {
-                                DB::query('DELETE FROM posts WHERE id=:postid and user_id=:userid', array(':postid'=>$_GET['postid'], ':userid'=>$followerid));
-                                DB::query('DELETE FROM posts_likes WHERE post_id=:postid', array(':postid'=>$_GET['postid']));
-                        }
-                }
-                 
-        }
-     }
+    $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
+    $allUsers = DB::query('SELECT username, profileimg FROM users');
+    $LastPost = DB::query('SELECT *,count(*) as count FROM `posts` ORDER BY `posted_at`DESC LIMIT 1')[0];
+    $NewestPost = DB::query('SELECT * FROM `posts` ORDER BY `posted_at` LIMIT 1')[0];
+    $Comment = DB::query('SELECT *, count(*) as count FROM `comments` ORDER BY `posted_at`DESC LIMIT 1')[0];
+    $LatestUser = DB::query('SELECT * FROM `users` ORDER BY `id`  DESC LIMIT 1')[0];
+    $UserCount = DB::query('SELECT count(*) FROM `users`')[0];
 }
 ?>
+
     <!DOCTYPE html>
     <html>
 
@@ -47,7 +25,6 @@ if (!$userId) {
         <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/fonts/ionicons.min.css">
         <link rel="stylesheet" href="assets/css/Footer-Dark.css">
-        <link rel="stylesheet" href="assets/css/Highlight-Clean.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.css">
         <link rel="stylesheet" href="assets/css/Login-Form-Clean.css">
         <link rel="stylesheet" href="assets/css/Navigation-Clean1.css">
@@ -143,74 +120,99 @@ if (!$userId) {
                 </div>
             </nav>
         </div>
-        <div>
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-2">
-                    </div>
-                    <div class="col-md-8">
-                        <ul class="list-group">
-                            <div class="timelineposts">
-                                <?php    
-                                if ($userId==$authorId){
-                                     echo   "<form action=''method='post' enctype='multipart/form-data'>
-                                            <input type='submit' name='deletepost' class='btn btn-primary' align='right' value='X' />
-                                        </form> ";
-                                   
-                                }
-                                echo "<li class='list-group-item' id='".$post[0]['id']."'><blockquote><p>".$post[0]['body']."</p>";
-                                if ($post[0]['postimg']!=""){
-                                    echo "<img data-tempsrc='".$post[0]['postimg']."' class='postimg'>";
-                                }
-                                echo "<footer>Posted by ".$post[0]['username']." on ".$post[0]['posted_at'];
-                                echo "<button class='btn btn-default' type='button' style='color:#eb3b60;background-image:url(&quot;none&quot;);background-color:transparent;' data-id=".$post[0]['id']."> <span class='glyphicon glyphicon-heart' ></span> ".$post[0]['likes']." Likes</span></button></footer>"   
-                                ?>
-                                <form action="" method="post" enctype="multipart/form-data">
-                                    <textarea name="postbody" rows="8" cols="70" required></textarea>
-                                    <input type="submit" name="post" value="Comment" class="btn btn-default" type="button" style="background-image:url(&quot;none&quot;);background-color:#316808;color:#fff;padding:16px 32px;margin:0px 0px 6px;border:none;box-shadow:none;text-shadow:none;opacity:0.9;text-transform:uppercase;font-weight:bold;font-size:13px;letter-spacing:0.4px;line-height:1;outline:none;">
-                                </form>
-                                <?php
-                                    echo "</blockquote></li>";
-                                ?>
-                                    <li class='list-group-item'>
-                                        <blockquote>
-                                            <?php 
-                                            if (!empty($comments)){
-                                                foreach ($comments as $comment){
-                                                   echo "<div class='media'>
-                                                      <div class='media-left'>
-                                                        <img src='".$comment['profileimg']."' class='media-object' style='width:60px; height:60px; border-radius: 25px;'>
-                                                      </div>
-                                                      <div class='media-body'>
-                                                        <h4 class='media-heading'>".$comment['username']."<small><i>Posted on ".$comment['posted_at']."</i></small></h4>
-                                                        <p>".$comment['comment']."</p>
-                                                      </div>
-                                                    </div>";
-                                                }
-                                            }  
-                                        ?>
-                                        </blockquote>
-                                    </li>
+        <div class="container">
+            <h1>Administrator panel </h1>
+            <div class="col-md-3">
+                <h2 class="text-center">User roles</h2>
+                <ul class="list-group" id="users">
+                    <?php
+                foreach ($allUsers as $userArr) {
+                    echo '<li class="list-group-item" style="background-color:#FFF;"><span style="font-size:16px;"><strong>'.$userArr['username'].'</strong></span>
+                    <img src="" data-tempsrc="'.$userArr['profileimg'].'" class="postimg avatar"></li> ';
+                    
+                    echo '      
+                    <select class="form-control" id="sel1">
+                        <option>Administrator</option>
+                        <option selected="selected">User</option>
+                      </select> 
+                    <button type="button" class="btn btn-success btn-block">Change</button>
+                    <button type="button" class="btn btn-danger btn-block">Remove</button>';
+                  
+                }
+                ?>
+                </ul>
+            </div>
+            <div class="timelineposts col-md-9">
+                <h2 class="text-center">Statistics</h2>
+                <div>
+                    <div class="media border p-3">
+                        <h3 class="text-center">Posts</h3>
+                        <div class="media-body">
+                            <div class="col-md-4">
+                               <?php echo "<h4>Total Count : <small><b>".$LastPost['count']." </b></small></h4>";?>
                             </div>
-                        </ul>
-                    </div>
-                    <div class="col-md-2">
+                            <div class="col-md-4">
+                                <?php echo "<h4>Most popular:<small><a href='post.php?id=".$LastPost['id']."'><b>".$LastPost['body']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
+                            
+                            </div>
+                            <div class="col-md-4">
+                                <?php echo "<h4>Newest:<small><a href='post.php?id=".$NewestPost['id']."'><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i></small></h4>" ?>
+                            </div>
+                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                        </div>
+
                     </div>
                 </div>
+                <div>
+                    <div class="media border p-3">
+                        <h3 class="text-center">Comments</h3>
+                        <div class="media-body">
+                            <div class="col-md-6">
+                                <?php echo "<h4>Total Count : <small><b>".$Comment['count']." </b></small></h4>";?>
+                            </div>
+                            <div class="col-md-6">
+                                   <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
+                            </div>
+                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                        </div>
+
+                    </div>
+                </div>
+                <div>
+                    
+                    <div class="media border p-3">
+                        <h3 class="text-center">Users</h3>
+                        <div class="media-body">
+                            <div class="col-md-6">
+                                <?php echo "<h4>Total Count : <small><b>".$UserCount[0]." </b></small></h4>";?>
+                            </div>
+                            <div class="col-md-6">
+                                <?php echo "<h4>Latest joiner: <small><a href='profile.php?username=".$LatestUser['username']."'><b>".$LatestUser['username']."</b><br></a></small></h4>"?>
+                            </div>
+
+                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                        </div>
+                    </div>
+                    <br>
+                    <button type="button" class="btn btn-success btn-block">Export everything to pdf</button>
+                </div>
             </div>
+
         </div>
-        <div class="footer-dark">
+        <div class="footer-dark navbar-bottom" style="position:relative">
             <footer>
                 <div class="container">
-                    <p class="copyright">Valerijs Diks @ 2017/2018</p>
+                    <p class="copyright">Valerijs Diks© 2017/2018</p>
                 </div>
             </footer>
         </div>
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+        <script src="assets/js/bs-animation.js"></script>
+        <script src="assets/js/searchbox.js"></script>
+        <script src="assets/js/pictureRender.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
+
     </body>
 
     </html>
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/post.js"></script>
-    <script src="assets/js/pictureRender.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>

@@ -7,61 +7,67 @@ include('./classes/Comment.php');
 $username = "";
 $verified = False;
 $isFollowing = False;
-if (isset($_GET['username'])) {
-        if (DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))) {
-                $userImg = DB::query('SELECT profileimg FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['profileimg'];
-                $username = DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['username'];
-                $description= DB::query('SELECT description FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['description'];
-                $userid = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['id'];
-                $verified = DB::query('SELECT verified FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['verified'];
-                $followerid = Login::isLoggedIn();
+if (!Login::isLoggedIn()) {
+    header('Location: login.html');
+    die;
+}else{ 
+    $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
+    if (isset($_GET['username'])) {
+            if (DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))) {
+                    $userImg = DB::query('SELECT profileimg FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['profileimg'];
+                    $username = DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['username'];
+                    $description= DB::query('SELECT description FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['description'];
+                    $userid = DB::query('SELECT id FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['id'];
+                    $verified = DB::query('SELECT verified FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['verified'];
+                    $followerid = Login::isLoggedIn();
 
-                if (isset($_POST['follow'])) {
+                    if (isset($_POST['follow'])) {
 
-                        if ($userid != $followerid) {
-                            
-                                if (!DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
-                                        if ($followerid == 6) {
-                                                DB::query('UPDATE users SET verified=1 WHERE id=:userid', array(':userid'=>$userid));
-                                        }
-                                        DB::query('INSERT INTO followers VALUES (null, :userid, :followerid)', array(':userid'=>$userid, ':followerid'=>$followerid));
-                                } else {
-                                        echo 'Already following!';
-                                }
-                                $isFollowing = True;
-                        }
-                }
-                if (isset($_POST['unfollow'])) {
+                            if ($userid != $followerid) {
 
-                        if ($userid != $followerid) {
+                                    if (!DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
+                                            if ($followerid == 6) {
+                                                    DB::query('UPDATE users SET verified=1 WHERE id=:userid', array(':userid'=>$userid));
+                                            }
+                                            DB::query('INSERT INTO followers VALUES (null, :userid, :followerid)', array(':userid'=>$userid, ':followerid'=>$followerid));
+                                    } else {
+                                            echo 'Already following!';
+                                    }
+                                    $isFollowing = True;
+                            }
+                    }
+                    if (isset($_POST['unfollow'])) {
 
-                                if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
-                                        if ($followerid == 6) {
-                                                DB::query('UPDATE users SET verified=0 WHERE id=:userid', array(':userid'=>$userid));
-                                        }
-                                        DB::query('DELETE FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid));
-                                }
-                                $isFollowing = False;
-                        }
-                }
-                if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
-                        $isFollowing = True;
-                }
+                            if ($userid != $followerid) {
 
-          
-                if (isset($_POST['post'])) {
-                    $str = str_replace(array("\r\n", "\n", "\r"), ' ', $_POST['postbody']);
-                        if ($_FILES['postimg']['size'] == 0) {                            
-                                Post::createPost($str, Login::isLoggedIn(), $userid);
-                        } else {
-                                $postid = Post::createImgPost($str, Login::isLoggedIn(), $userid);
-                                Image::uploadImage('postimg', "UPDATE posts SET postimg=:postimg WHERE id=:postid", array(':postid'=>$postid));
-                        }
-                }
-        } else {
-                die('User not found!');
+                                    if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
+                                            if ($followerid == 6) {
+                                                    DB::query('UPDATE users SET verified=0 WHERE id=:userid', array(':userid'=>$userid));
+                                            }
+                                            DB::query('DELETE FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid));
+                                    }
+                                    $isFollowing = False;
+                            }
+                    }
+                    if (DB::query('SELECT follower_id FROM followers WHERE user_id=:userid AND follower_id=:followerid', array(':userid'=>$userid, ':followerid'=>$followerid))) {
+                            $isFollowing = True;
+                    }
+
+
+                    if (isset($_POST['post'])) {
+                        $str = str_replace(array("\r\n", "\n", "\r"), ' ', $_POST['postbody']);
+                            if ($_FILES['postimg']['size'] == 0) {                            
+                                    Post::createPost($str, Login::isLoggedIn(), $userid);
+                            } else {
+                                    $postid = Post::createImgPost($str, Login::isLoggedIn(), $userid);
+                                    Image::uploadImage('postimg', "UPDATE posts SET postimg=:postimg WHERE id=:postid", array(':postid'=>$postid));
+                            }
+                    }
+            } else {
+                    die('User not found!');
+            }
         }
-}
+    }
 
 ?>
     <!DOCTYPE html>
@@ -94,12 +100,12 @@ if (isset($_GET['username'])) {
                     </div>
                     <div class="dropdown">
                         <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
-                            <img src="" data-tempsrc="<?php echo $userImg?>" class="postimg avatar"></button>
+                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">
                             <li role="presentation">
-                                <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                             <li class="divider" role="presentation"></li>
-                            <li role="presentation"><a href="index.php">Timeline </a></li>
+                            <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                             <li role="presentation"><a href="messages.php">Messages </a></li>
                             <li role="presentation"><a href="notify.php">Notifications </a></li>
                             <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -127,14 +133,16 @@ if (isset($_GET['username'])) {
                         </form>
                         <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
                             <li role="presentation"><a href="index.php">My Timeline</a></li>
-                              <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#"><?php echo $username?> 
-                            <span class="caret"></span>
-                             <img src="" data-tempsrc="<?php echo $userImg?>" class="postimg avatar"></a>
+                            <li class="dropdown open">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">
+                                    <?php echo $user[0]['username']?>
+                                    <span class="caret"></span>
+                                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                        <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -144,16 +152,18 @@ if (isset($_GET['username'])) {
                             </li>
                         </ul>
                         <ul class="nav navbar-nav hidden-xs hidden-sm navbar-right">
-                            <li role="presentation"><a href="index.php">Timeline</a></li>
+                            <li class="active" role="presentation"><a href="index.php">Timeline</a></li>
                             <li role="presentation"><a href="messages.php">Messages</a></li>
                             <li role="presentation"><a href="notify.php">Notifications</a></li>
-                              <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#"><?php echo $username?>
-                            <span class="caret"></span> <img src="" data-tempsrc="<?php echo $userImg?>" class="postimg avatar"></a>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">
+                                    <?php echo $user[0]['username']?>
+                                    <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li class="active" role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                    <li role="presentation">
+                                        <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -238,7 +248,7 @@ if (isset($_GET['username'])) {
                         <h4 class="modal-title">New Post</h4>
                     </div>
                     <form action="profile.php?username=<?php echo $username; ?>" method="post" enctype="multipart/form-data">
-                        <div style="max-height: 400px; overflow-y: auto">
+                        <div style="max-height: 400px; overflow-y: auto; padding-left:7px">
                             <textarea name="postbody" rows="8" cols="80"></textarea>
                             <br />Upload an image:
                             <input type="file" name="postimg">
@@ -262,7 +272,6 @@ if (isset($_GET['username'])) {
         </div>
         <script src="assets/js/jquery.min.js"></script>
         <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-        <script src="assets/js/bs-animation.js"></script>
         <script src="assets/js/profile.js"></script>
         <script src="assets/js/searchbox.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
