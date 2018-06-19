@@ -1,6 +1,7 @@
 <?php
 include('./classes/DB.php');
 include('./classes/Login.php');
+require_once ('vendor/autoload.php');
 if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
@@ -15,7 +16,6 @@ if (!Login::isLoggedIn()) {
             if (isset($_POST['removeUser'])) {
                 DB::query('DELETE FROM login_tokens WHERE user_id=:userid',array(':userid'=>$userId));
                 DB::query('DELETE FROM users WHERE id=:userid',array(':userid'=>$userId));
-             
             }
                  
         }
@@ -26,6 +26,84 @@ if (!Login::isLoggedIn()) {
     $Comment = DB::query('SELECT *, count(*) as count FROM `comments` ORDER BY `posted_at`DESC LIMIT 1')[0];
     $LatestUser = DB::query('SELECT * FROM `users` ORDER BY `id`  DESC LIMIT 1')[0];
     $UserCount = DB::query('SELECT count(*) FROM `users`')[0];
+    
+    if (isset($_POST['statPost'])){
+              $mpdf = new \Mpdf\Mpdf();
+            ob_start();
+            $day = date('d');
+            $year = date('Y');
+            $month = date('F');
+            echo "<h1>Post statistic for $month $day, $year</h1>";
+            echo "    
+                        <h3 class='text-center'>Posts</h3><br>
+                                <h4>Total Count : <small><b>".$LastPost['count']."</b></small></h4><br>
+                                <h4>Most popular:<small><b>".$LastPost['body']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4><br>
+                                <h4>Newest:<small><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i>";
+            $html = ob_get_contents();
+            ob_end_clean();
+
+            $mpdf->WriteHTML(utf8_encode($html));
+            $mpdf->Output('PostStatistic.pdf','D');  
+        }
+        
+    if (isset($_POST['statComments'])){
+              $mpdf = new \Mpdf\Mpdf();
+            ob_start();
+            $day = date('d');
+            $year = date('Y');
+            $month = date('F');
+            echo "<h1>Comments statistic for $month $day, $year</h1>";
+            echo "    
+                        <h3 class='text-center'>Comments</h3><br>
+                                <h4>Total Count : <small><b>".$Comment['count']."</b></small></h4><br>
+                                <h4>Most popular:<small><b>".$Comment['comment']."</b><br></a><i>posted on : ".$Comment['posted_at']."</i></small></h4><br>
+                                ";
+            $html = ob_get_contents();
+            ob_end_clean();
+
+            $mpdf->WriteHTML(utf8_encode($html));
+            $mpdf->Output('CommentsStatistic.pdf','D');  
+        }
+       if (isset($_POST['statUsers'])){
+              $mpdf = new \Mpdf\Mpdf();
+            ob_start();
+            $day = date('d');
+            $year = date('Y');
+            $month = date('F');
+            echo "<h1>User statistic for $month $day, $year</h1>";
+            echo "    
+                        <h3 class='text-center'>Users</h3><br>
+                                <h4>Total Count : <small><b>".$UserCount[0]."</b></small></h4><br>
+                                <h4>Latest joiner: <small><b>".$LatestUser['username']."</small></h4><br>
+                                ";
+            $html = ob_get_contents();
+            ob_end_clean();
+            $mpdf->WriteHTML(utf8_encode($html));
+            $mpdf->Output('UserStatistic.pdf','D');  
+        }
+          if (isset($_POST['statEverything'])){
+              $mpdf = new \Mpdf\Mpdf();
+            ob_start();
+            $day = date('d');
+            $year = date('Y');
+            $month = date('F');
+            echo "<h1>Statistic for $month $day, $year</h1>";
+            echo "    <h3 class='text-center'>Posts</h3><br>
+                                <h4>Total Count : <small><b>".$LastPost['count']."</b></small></h4><br>
+                                <h4>Most popular:<small><b>".$LastPost['body']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4><br>
+                                <h4>Newest:<small><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i><br>
+                       <h3 class='text-center'>Comments</h3><br>
+                                <h4>Total Count : <small><b>".$Comment['count']."</b></small></h4><br>
+                                <h4>Most popular:<small><b>".$Comment['comment']."</b><br></a><i>posted on : ".$Comment['posted_at']."</i></small></h4><br>
+                        <h3 class='text-center'>Users</h3><br>
+                                <h4>Total Count : <small><b>".$UserCount[0]."</b></small></h4>
+                              <h4>Latest joiner: <small><b>".$LatestUser['username']."</small></h4><br>
+                                ";
+            $html = ob_get_contents();
+            ob_end_clean();
+            $mpdf->WriteHTML(utf8_encode($html));
+            $mpdf->Output('Statistics.pdf','D');  
+        }
 }
 ?>
 
@@ -180,7 +258,9 @@ if (!Login::isLoggedIn()) {
                             <div class="col-md-4">
                                 <?php echo "<h4>Newest:<small><a href='post.php?id=".$NewestPost['id']."'><b>".$NewestPost['body']."</b><br></a><i>Posted on ".$NewestPost['posted_at']."</i></small></h4>" ?>
                             </div>
-                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                            <form action="" method="post">
+                                <button type="submit" name="statPost" value="export" class="btn btn-success btn-block">Export to pdf</button>
+                            </form>
                         </div>
 
                     </div>
@@ -193,9 +273,11 @@ if (!Login::isLoggedIn()) {
                                 <?php echo "<h4>Total Count : <small><b>".$Comment['count']." </b></small></h4>";?>
                             </div>
                             <div class="col-md-6">
-                                <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$LastPost['posted_at']."</i></small></h4>" ?>
+                                <?php echo "<h4>Most popular:<small><a href='post.php?id=".$Comment['post_id']."'><b>".$Comment['comment']."</b><br></a><i>Posted on ".$Comment['posted_at']."</i></small></h4>" ?>
                             </div>
-                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                            <form action="" method="post">
+                                <button type="submit" name="statComments" value="export" class="btn btn-success btn-block">Export to pdf</button>
+                            </form>
                         </div>
 
                     </div>
@@ -211,12 +293,15 @@ if (!Login::isLoggedIn()) {
                             <div class="col-md-6">
                                 <?php echo "<h4>Latest joiner: <small><a href='profile.php?username=".$LatestUser['username']."'><b>".$LatestUser['username']."</b><br></a></small></h4>"?>
                             </div>
-
-                            <button type="button" class="btn btn-success btn-block">Export to pdf</button>
+                            <form action="" method="post">
+                                <button type="submit" name="statUsers" value="export" class="btn btn-success btn-block">Export to pdf</button>
+                            </form>
                         </div>
                     </div>
                     <br>
-                    <button type="button" class="btn btn-success btn-block">Export everything to pdf</button>
+                    <form action="" method="post">
+                        <button type="submit" name="statEverything" value="export" class="btn btn-success btn-block">Export everything to pdf</button>
+                    </form>
                 </div>
             </div>
 
