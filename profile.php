@@ -11,7 +11,7 @@ if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{ 
-    $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
+    $user = DB::query('SELECT username, profileimg, role FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
     if (isset($_GET['username'])) {
             if (DB::query('SELECT username FROM users WHERE username=:username', array(':username'=>$_GET['username']))) {
                     $userImg = DB::query('SELECT profileimg FROM users WHERE username=:username', array(':username'=>$_GET['username']))[0]['profileimg'];
@@ -92,27 +92,34 @@ if (!Login::isLoggedIn()) {
         <header class="hidden-sm hidden-md hidden-lg">
             <div class="searchbox">
                 <form>
-                    <h1 class="text-left">RVT SOC</h1>
-                    <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
-                        <input class="form-control sbox" type="text">
-                        <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
-                        </ul>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
+                    <?php
+                    if ($user[0]['role']==1){
+                           echo '<a href="admin.php"> <h1 class="text-left">SocNet</h1></a>';
+                        }else{
+                            echo '<a href="index.php"> <h1 class="text-left">SocNet</h1></a>';
+                    }
+                ?>
+
+                        <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
+                            <input class="form-control sbox" type="text">
+                            <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
                     <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li role="presentation">
-                                <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
-                            <li class="divider" role="presentation"></li>
-                            <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
-                            <li role="presentation"><a href="messages.php">Messages </a></li>
-                            <li role="presentation"><a href="notify.php">Notifications </a></li>
-                            <li role="presentation"><a href="my_account.php">Account Managment</a></li>
-                            <li role="presentation"><a href="change_password.php">Password change</a></li>
-                            <li role="presentation"><a href="logout.php">Logout </a></li>
-                        </ul>
-                    </div>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li class="active" role="presentation">
+                                    <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
+                                <li class="divider" role="presentation"></li>
+                                <li  role="presentation"><a href="index.php">Timeline </a></li>
+                                <li role="presentation"><a href="messages.php">Messages </a></li>
+                                <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li role="presentation"><a href="my_account.php">Account Managment</a></li>
+                                <li role="presentation"><a href="change_password.php">Password change</a></li>
+                                <li role="presentation"><a href="logout.php">Logout </a></li>
+                            </ul>
+                        </div>
                 </form>
             </div>
             <hr>
@@ -120,7 +127,15 @@ if (!Login::isLoggedIn()) {
         <div>
             <nav class="navbar navbar-default hidden-xs navigation-clean">
                 <div class="container">
-                    <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>
+                    <div class="navbar-header">
+                        <?php 
+                        if ($user[0]['role']==1){
+                           echo '<a class="navbar-brand navbar-link" href="admin.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }else{
+                            echo '<a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }
+                    ?>
+
                         <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
                     </div>
                     <div class="collapse navbar-collapse" id="navcol-1">
@@ -139,10 +154,10 @@ if (!Login::isLoggedIn()) {
                                     <span class="caret"></span>
                                     <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li role="presentation">
+                                    <li class="active" role="presentation">
                                         <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li  role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>
@@ -152,7 +167,7 @@ if (!Login::isLoggedIn()) {
                             </li>
                         </ul>
                         <ul class="nav navbar-nav hidden-xs hidden-sm navbar-right">
-                            <li class="active" role="presentation"><a href="index.php">Timeline</a></li>
+                            <li  role="presentation"><a href="index.php">Timeline</a></li>
                             <li role="presentation"><a href="messages.php">Messages</a></li>
                             <li role="presentation"><a href="notify.php">Notifications</a></li>
                             <li class="dropdown">
@@ -160,10 +175,10 @@ if (!Login::isLoggedIn()) {
                                     <?php echo $user[0]['username']?>
                                     <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li role="presentation">
+                                    <li class="active" role="presentation">
                                         <?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                     <li class="divider" role="presentation"></li>
-                                    <li class="active" role="presentation"><a href="index.php">Timeline </a></li>
+                                    <li role="presentation"><a href="index.php">Timeline </a></li>
                                     <li role="presentation"><a href="messages.php">Messages </a></li>
                                     <li role="presentation"><a href="notify.php">Notifications </a></li>
                                     <li role="presentation"><a href="my_account.php">Account Managment</a></li>

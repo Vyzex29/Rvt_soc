@@ -5,7 +5,7 @@ if (!Login::isLoggedIn()) {
     header('Location: login.html');
     die;
 }else{
-$user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
+$user = DB::query('SELECT username, profileimg, role FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
 }
 ?>
 
@@ -25,12 +25,18 @@ $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', arr
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/index.css">
 </head>
-
 <body>
     <header class="hidden-sm hidden-md hidden-lg">
         <div class="searchbox">
             <form>
-                <h1 class="text-left">RVT SOC</h1>
+                <?php
+                    if ($user[0]['role']==1){
+                           echo '<a href="admin.php"> <h1 class="text-left">SocNet</h1></a>';
+                        }else{
+                            echo '<a href="index.php"> <h1 class="text-left">SocNet</h1></a>';
+                    }
+                ?>
+               
                 <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
                     <input class="form-control sbox" type="text">
                     <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
@@ -57,7 +63,15 @@ $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', arr
     <div>
         <nav class="navbar navbar-default hidden-xs navigation-clean">
             <div class="container">
-                <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>
+                <div class="navbar-header">
+                    <?php 
+                        if ($user[0]['role']==1){
+                           echo '<a class="navbar-brand navbar-link" href="admin.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }else{
+                            echo '<a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }
+                    ?>
+                    
                     <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
                 </div>
                 <div class="collapse navbar-collapse" id="navcol-1">
@@ -140,8 +154,7 @@ $user = DB::query('SELECT username, profileimg FROM users WHERE id=:userid', arr
     <script src="assets/js/bs-animation.js"></script>
     <script src="assets/js/index.js"></script>
     <script src="assets/js/searchbox.js"></script>
-    <script src="assets/js/pictureRender.js"></script>
-    
+    <script src="assets/js/pictureRender.js"></script>  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
   
 </body>

@@ -84,7 +84,6 @@ var username = document.getElementById("user").className;
                         })
 
                         scrollToAnchor(location.hash)
-
                         start += 5;
                         setTimeout(function () {
                             working = false;
@@ -189,7 +188,12 @@ var username = document.getElementById("user").className;
                     }
                 })
 
-                //scrollToAnchor(location.hash)
+                   scrollToAnchor(location.hash)
+                        start += 5;
+                        setTimeout(function () {
+                            working = false;
+                        }, 4000)
+
 
             },
             error: function (r) {

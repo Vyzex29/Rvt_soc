@@ -4,7 +4,7 @@ include('./classes/Login.php');
 include('./classes/Image.php');
 if (Login::isLoggedIn()) {
         $userid = Login::isLoggedIn();
-        $User=DB::query('SELECT username,profileimg, description FROM users WHERE id=:userid', array(':userid'=>$userid));
+      $user = DB::query('SELECT username, profileimg, description, role FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()));
 } else {
         die('Not logged in');
 }
@@ -34,96 +34,108 @@ if (isset($_POST['changeDescription'])) {
     </head>
 
     <body>
-        <header class="hidden-sm hidden-md hidden-lg">
-            <div class="searchbox">
-                <form>
-                    <h1 class="text-left">RVT SOC</h1>
-                    <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
-                        <input class="form-control sbox" type="text">
-                        <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
-                        </ul>
-                    </div>
-                    <div class="dropdown">
-                           <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
-                    <img src="" data-tempsrc="<?php echo $User[0]['profileimg']?>" class="postimg avatar"></button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                            <li role="presentation">
-                                <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
-                            <li class="divider" role="presentation"></li>
-                            <li role="presentation"><a href="index.php">Timeline </a></li>
-                            <li role="presentation"><a href="messages.php">Messages </a></li>
-                            <li role="presentation"><a href="notify.php">Notifications </a></li>
-                            <li role="presentation" class="active"><a href="my_account.php">Account Managment</a></li>
-                            <li role="presentation"><a href="change_password.php">Password change</a></li>                            
-                            <li role="presentation"><a href="logout.php">Logout </a></li>
-                        </ul>
-                    </div>
-                </form>
-            </div>
-            <hr>
-        </header>
-        <div>
-            <nav class="navbar navbar-default hidden-xs navigation-clean">
-                <div class="container">
-                    <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>
-                        <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
-                    </div>
-                    <div class="collapse navbar-collapse" id="navcol-1">
-                        <form class="navbar-form navbar-left">
-                            <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
-                                <input class="form-control sbox" type="text">
-                                <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index:100">
-                                </ul>
-                            </div>
-                        </form>
-                        <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
-                            <li role="presentation"><a href="index.php">My Timeline</a></li>
-                           <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#"><?php echo $User[0]['username']?> 
-                            <span class="caret"></span>
-                             <img src="" data-tempsrc="<?php echo $User[0]['profileimg']?>" class="postimg avatar"></a>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
-                                    <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
-                                    <li role="presentation"><a href="messages.php">Messages </a></li>
-                                    <li role="presentation"><a href="notify.php">Notifications </a></li>
-                                    <li role="presentation" class="active" ><a href="my_account.php">Account Managment</a></li>
-                                    <li role="presentation"><a href="change_password.php">Password change</a></li>
-                                    <li role="presentation"><a href="logout.php">Logout </a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <ul class="nav navbar-nav hidden-xs hidden-sm navbar-right">
-                            <li role="presentation"><a href="index.php">Timeline</a></li>
-                            <li role="presentation"><a href="messages.php">Messages</a></li>
-                            <li role="presentation"><a href="notify.php">Notifications</a></li>
-                            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#"><?php echo $User[0]['username']?>
-                            <span class="caret"></span> <img src="" data-tempsrc="<?php echo $User[0]['profileimg']?>" class="postimg avatar"></a>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li role="presentation">
-                                        <?php echo '<a href="profile.php?username='.$User[0]['username'].'">My Profile</a>'?></li>
-                                    <li class="divider" role="presentation"></li>
-                                    <li role="presentation"><a href="index.php">Timeline </a></li>
-                                    <li role="presentation"><a href="messages.php">Messages </a></li>
-                                    <li role="presentation"><a href="notify.php">Notifications </a></li>
-                                    <li role="presentation" class="active"><a href="my_account.php">Account Managment</a></li>
-                                    <li role="presentation"><a href="change_password.php">Password change</a></li>
-                                    <li role="presentation"><a href="logout.php">Logout </a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </div>
+       <header class="hidden-sm hidden-md hidden-lg">
+        <div class="searchbox">
+            <form>
+                <?php
+                    if ($user[0]['role']==1){
+                           echo '<a href="admin.php"> <h1 class="text-left">SocNet</h1></a>';
+                        }else{
+                            echo '<a href="index.php"> <h1 class="text-left">SocNet</h1></a>';
+                    }
+                ?>
+               
+                <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
+                    <input class="form-control sbox" type="text">
+                    <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
+                    </ul>
                 </div>
-            </nav>
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
+                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
+                        <li class="divider" role="presentation"></li>
+                        <li   role="presentation"><a href="index.php">Timeline </a></li>
+                        <li role="presentation"><a href="messages.php">Messages </a></li>
+                        <li role="presentation"><a href="notify.php">Notifications </a></li>
+                        <li class="active" role="presentation"><a href="my_account.php">Account Managment</a></li>
+                        <li role="presentation"><a href="change_password.php">Password change</a></li>
+                        <li role="presentation"><a href="logout.php">Logout </a></li>
+                    </ul>
+                </div>
+            </form>
         </div>
+        <hr>
+    </header>
+    <div>
+        <nav class="navbar navbar-default hidden-xs navigation-clean">
+            <div class="container">
+                <div class="navbar-header">
+                    <?php 
+                        if ($user[0]['role']==1){
+                           echo '<a class="navbar-brand navbar-link" href="admin.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }else{
+                            echo '<a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }
+                    ?>
+                    
+                    <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
+                </div>
+                <div class="collapse navbar-collapse" id="navcol-1">
+                    <form class="navbar-form navbar-left">
+                        <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
+                            <input class="form-control sbox" type="text">
+                            <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index:100">
+                            </ul>
+                        </div>
+                    </form>                     
+                    <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
+                        <li role="presentation"><a href="index.php">My Timeline</a></li>
+                        <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#"><?php echo $user[0]['username']?> 
+                            <span class="caret"></span>
+                             <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
+                                <li class="divider" role="presentation"></li>
+                                <li  role="presentation"><a href="index.php">Timeline </a></li>
+                                <li role="presentation"><a href="messages.php">Messages </a></li>
+                                <li role="presentation"><a href="notify.php">Notifications </a></li>                               
+                                <li class="active" role="presentation"><a href="my_account.php">Account Managment</a></li>
+                                <li role="presentation"><a href="change_password.php">Password change</a></li>
+                                <li role="presentation"><a href="logout.php">Logout </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav hidden-xs hidden-sm navbar-right">
+                        <li  role="presentation"><a href="index.php">Timeline</a></li>
+                        <li role="presentation"><a href="messages.php">Messages</a></li>
+                        <li role="presentation"><a href="notify.php">Notifications</a></li>
+                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#"><?php echo $user[0]['username']?>
+                            <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
+                                <li class="divider" role="presentation"></li>
+                                <li role="presentation"><a href="index.php">Timeline </a></li>
+                                <li role="presentation"><a href="messages.php">Messages </a></li>
+                                <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li class="active" role="presentation"><a href="my_account.php">Account Managment</a></li>
+                                <li role="presentation"><a href="change_password.php">Password change</a></li>
+                                <li role="presentation"><a href="logout.php">Logout </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
         <div class="container">
             <div class="timelineposts">
                 <div class="row">
                     <h1 class="text-center">My Account</h1>
                     <div class="col-md-6 text-center">
                         <h2>Your Image:</h2>
-                        <img src="" data-tempsrc="<?php echo $User[0]['profileimg']?>" class="postimg">
+                        <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg">
 
                         <form action="my_account.php" method="post" enctype="multipart/form-data">
                             <div>
@@ -138,10 +150,10 @@ if (isset($_POST['changeDescription'])) {
                         <h2>Your Description:</h2>
                         <p>
                             <?php
-                                if(empty($User[0]['description'])){
+                                if(empty($user[0]['description'])){
                                     echo "You don't have a description yet";
                                 }else{
-                                   echo $User[0]['description']; 
+                                   echo $user[0]['description']; 
                                 }
                                 
                             ?>
