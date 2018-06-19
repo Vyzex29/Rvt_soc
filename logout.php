@@ -6,11 +6,11 @@ if (!Login::isLoggedIn()) {
     die;
 }else{
     $userid=Login::isLoggedin();
-    $username = DB::query('SELECT username FROM users WHERE id=:userid', array(':userid'=>Login::isLoggedIn()))[0]['username'];
+    $user = DB::query('SELECT username, profileimg, role FROM users WHERE id=:userid', array(':userid'=>$userid));
 
     if (isset($_POST['confirm'])){
     if($_POST['alldevices']){
-        DB::query('DELETE FROM login_tokens WHERE user_id=:userid',array(':userid'=>Login::isLoggedIn()));
+        DB::query('DELETE FROM login_tokens WHERE user_id=:userid',array(':userid'=>$userid));
     }else{
         if (isset($_COOKIE['SNID'])){
             DB::query('DELETE FROM login_tokens WHERE token=:token',array(':token'=>sha1($_COOKIE['SNID'])));   
@@ -46,30 +46,37 @@ if (isset($_POST['delete'])){
     <link rel="stylesheet" href="assets/css/Login-Form-Clean.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean1.css">
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/untitled.css">
 </head>
 
 <body>
     <header class="hidden-sm hidden-md hidden-lg">
         <div class="searchbox">
             <form>
-                <h1 class="text-left">Social Network</h1>
+                <?php
+                    if ($user[0]['role']==1){
+                           echo '<a href="admin.php"> <h1 class="text-left">SocNet</h1></a>';
+                        }else{
+                            echo '<a href="index.php"> <h1 class="text-left">SocNet</h1></a>';
+                    }
+                ?>
+               
                 <div class="searchbox"><i class="glyphicon glyphicon-search"></i>
                     <input class="form-control sbox" type="text">
                     <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index: 100">
                     </ul>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span></button>
+                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" type="button">MENU <span class="caret"></span> 
+                    <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                        <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                         <li class="divider" role="presentation"></li>
                         <li role="presentation"><a href="index.php">Timeline </a></li>
                         <li role="presentation"><a href="messages.php">Messages </a></li>
                         <li role="presentation"><a href="notify.php">Notifications </a></li>
                         <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                         <li role="presentation"><a href="change_password.php">Password change</a></li>
-                        <li role="presentation"><a href="logout.php">Logout </a></li>
+                        <li class="active" role="presentation"><a href="logout.php">Logout </a></li>
                     </ul>
                 </div>
             </form>
@@ -79,7 +86,15 @@ if (isset($_POST['delete'])){
     <div>
         <nav class="navbar navbar-default hidden-xs navigation-clean">
             <div class="container">
-                <div class="navbar-header"><a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>
+                <div class="navbar-header">
+                    <?php 
+                        if ($user[0]['role']==1){
+                           echo '<a class="navbar-brand navbar-link" href="admin.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }else{
+                            echo '<a class="navbar-brand navbar-link" href="index.php"><i class="icon ion-ios-navigate"></i></a>';
+                        }
+                    ?>
+                    
                     <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button>
                 </div>
                 <div class="collapse navbar-collapse" id="navcol-1">
@@ -89,19 +104,21 @@ if (isset($_POST['delete'])){
                             <ul class="list-group autocomplete" style="position:absolute;width:100%; z-index:100">
                             </ul>
                         </div>
-                    </form>
+                    </form>                     
                     <ul class="nav navbar-nav hidden-md hidden-lg navbar-right">
                         <li role="presentation"><a href="index.php">My Timeline</a></li>
-                        <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#">User <span class="caret"></span></a>
+                        <li class="dropdown open"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" href="#"><?php echo $user[0]['username']?> 
+                            <span class="caret"></span>
+                             <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                 <li class="divider" role="presentation"></li>
-                                <li role="presentation"><a href="index.php">Timeline </a></li>
+                                <li  role="presentation"><a href="index.php">Timeline </a></li>
                                 <li role="presentation"><a href="messages.php">Messages </a></li>
-                                <li role="presentation"><a href="notify.php">Notifications </a></li>
+                                <li role="presentation"><a href="notify.php">Notifications </a></li>                               
                                 <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
-                                <li role="presentation"><a href="logout.php">Logout </a></li>
+                                <li class="active" role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
                         </li>
                     </ul>
@@ -109,16 +126,17 @@ if (isset($_POST['delete'])){
                         <li  role="presentation"><a href="index.php">Timeline</a></li>
                         <li role="presentation"><a href="messages.php">Messages</a></li>
                         <li role="presentation"><a href="notify.php">Notifications</a></li>
-                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">User <span class="caret"></span></a>
+                        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#"><?php echo $user[0]['username']?>
+                            <span class="caret"></span> <img src="" data-tempsrc="<?php echo $user[0]['profileimg']?>" class="postimg avatar"></a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                <li role="presentation"><?php echo '<a href="profile.php?username='.$username.'">My Profile</a>'?></li>
+                                <li role="presentation"><?php echo '<a href="profile.php?username='.$user[0]['username'].'">My Profile</a>'?></li>
                                 <li class="divider" role="presentation"></li>
-                                <li role="presentation"><a href="index.php">Timeline </a></li>
+                                <li  role="presentation"><a href="index.php">Timeline </a></li>
                                 <li role="presentation"><a href="messages.php">Messages </a></li>
                                 <li role="presentation"><a href="notify.php">Notifications </a></li>
                                 <li role="presentation"><a href="my_account.php">Account Managment</a></li>
                                 <li role="presentation"><a href="change_password.php">Password change</a></li>
-                                <li class="active"  role="presentation"><a href="logout.php">Logout </a></li>
+                                <li class="active" role="presentation"><a href="logout.php">Logout </a></li>
                             </ul>
                         </li>
                     </ul>
@@ -154,7 +172,7 @@ if (isset($_POST['delete'])){
     </div>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/bs-animation.js"></script>
+    <script src="assets/js/pictureRender.js"></script>  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
 
 
